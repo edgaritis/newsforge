@@ -538,6 +538,19 @@
   }
   .btn-tiny.active { background: #0A0A0A; color: #fff; border-color: #0A0A0A; }
   #colorPresets .cp:hover { transform: scale(1.12); }
+  .step4-nav {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    background: rgba(242,238,227,0.96); backdrop-filter: blur(4px);
+    padding: 10px 0; margin-bottom: 18px; border-bottom: 1.5px solid #D5CFC1;
+  }
+  .step4-nav .s4label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #888; }
+  .step4-nav button {
+    padding: 7px 14px; border: 1.5px solid #0A0A0A; background: #fff; color: #0A0A0A;
+    cursor: pointer; font-size: 12px; font-weight: 700; border-radius: 4px;
+  }
+  .step4-nav button:hover { background: #0A0A0A; color: #fff; }
+  #jumpHooks, #jumpCover, #jumpCaption, #jumpCarousel { scroll-margin-top: 64px; }
 </style>
 </head>
 <body>
@@ -695,8 +708,16 @@
         <span class="step-title">Pick hook, image, post</span>
       </div>
 
+      <div class="step4-nav" id="step4Nav">
+        <span class="s4label">Jump:</span>
+        <button type="button" data-jump="jumpHooks">Hooks</button>
+        <button type="button" data-jump="jumpCover">Cover</button>
+        <button type="button" data-jump="jumpCaption">Caption</button>
+        <button type="button" data-jump="jumpCarousel">Carousel</button>
+      </div>
+
       <div class="results-grid">
-        <div class="col-top">
+        <div class="col-top" id="jumpHooks">
           <div class="section-label">Source headline</div>
           <div class="article-preview" id="sourceHeadlineBox" style="margin-bottom: 24px;"></div>
 
@@ -705,7 +726,7 @@
         </div>
 
         <!-- COVER: right column on desktop; sits between hooks and summary on mobile -->
-        <div class="cover-col">
+        <div class="cover-col" id="jumpCover">
           <div class="section-label">Cover image / video</div>
 
           <div class="mode-toggle" style="margin-bottom: 12px;">
@@ -822,7 +843,7 @@
         </div>
 
         <div class="col-rest">
-          <div class="section-label" style="margin-top: 32px;">Summary (for the caption)</div>
+          <div class="section-label" id="jumpCaption" style="margin-top: 32px;">Summary (for the caption)</div>
           <div class="summary-box" id="summaryBox"></div>
           <div class="controls-row" style="margin-top: 10px;">
             <button class="btn-tiny" id="copySummaryBtn">📋 Copy Summary</button>
@@ -841,8 +862,8 @@
             <button class="btn-secondary" id="copyImagePromptBtn">📋 Copy Image Prompt</button>
           </div>
 
-          <details open style="margin-top: 32px; border: 1.5px solid #D5CFC1; background: #FFF;">
-            <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▾ Carousel builder (5 slides)</summary>
+          <details id="jumpCarousel" style="margin-top: 32px; border: 1.5px solid #D5CFC1; background: #FFF;">
+            <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Carousel builder (5 slides)</summary>
             <div style="padding: 8px 18px 18px;">
               <div class="note" style="margin-bottom: 16px;">Slide 1 uses the cover photo + box. Slides 2–5 are big text on the blue background. Edit any text and the preview updates. Download each, or all at once.</div>
               <div id="carouselContainer"></div>
@@ -887,6 +908,14 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.13</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>Fixed video export running longer than the trimmed clip — it now waits for the trim-in point before recording, with a safety timer so a clip can't overrun its length.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.12</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>Less scrolling after Process Response: a <strong>sticky quick-jump bar</strong> (Hooks · Cover · Caption · Carousel), the <strong>Carousel collapsed by default</strong>, and the page <strong>auto-scrolls to the results</strong>.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.11</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Design panel</strong> on the cover: pick from <strong>4 layouts</strong> (Straddle / Top box / Lower-third / Over image), recolour (primary / accent / text + presets), and add a <strong>watermark</strong> (page handle text or logo, with position &amp; opacity). Applies to image and video; resets fresh each post.</li>
@@ -948,7 +977,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.11 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.13 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -1328,6 +1357,11 @@ function parseResponse() {
   state.editableHooks = [state.article.title, ...parsed.hooks];
   state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverCleared = false;
   renderStep4();
+  // jump straight to the results so there's no long scroll past the paste box
+  requestAnimationFrame(() => {
+    const nav = $('step4Nav') || $('step4');
+    if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 }
 
 // ============================================================
@@ -2072,6 +2106,7 @@ function finishExportUI() {
 }
 function stopExport() {
   state.exporting = false;
+  if (state.exportWatchdog) { clearTimeout(state.exportWatchdog); state.exportWatchdog = null; }
   if (state.videoEl) { try { state.videoEl.pause(); } catch (_) {} }
   if (state.recorder && state.recorder.state !== 'inactive') { try { state.recorder.stop(); } catch (_) {} }
 }
@@ -2127,16 +2162,30 @@ async function exportVideo() {
     drawVideoFrameOnce();
   };
 
-  v.currentTime = state.trimStart;
   $('exportProgressWrap').classList.remove('hidden');
   $('exportVideoBtn').disabled = true;
   $('exportProgressBar').style.width = '0%';
   $('exportProgressText').textContent = 'Starting…';
 
-  try { rec.start(100); } catch (e) { finishExportUI(); showError($('canvasWarning'), 'Could not start recording: ' + e.message); return; }
-  await v.play().catch(() => {});
+  // Seek to the trim start and WAIT for the seek to land before recording.
+  // Starting playback before the seek completes records from the wrong position,
+  // which is why a trimmed clip could export longer than its actual span.
+  try { v.pause(); } catch (_) {}
+  await new Promise((resolve) => {
+    let settled = false;
+    const finish = () => { if (settled) return; settled = true; v.removeEventListener('seeked', finish); resolve(); };
+    v.addEventListener('seeked', finish);
+    try { v.currentTime = state.trimStart; } catch (_) {}
+    setTimeout(finish, 700); // fallback if 'seeked' never fires
+  });
 
   const span = (state.trimEnd - state.trimStart) || 1;
+  try { rec.start(100); } catch (e) { finishExportUI(); showError($('canvasWarning'), 'Could not start recording: ' + e.message); return; }
+  await v.play().catch(() => {});
+  // Watchdog: never let the recording run longer than the trimmed span
+  if (state.exportWatchdog) clearTimeout(state.exportWatchdog);
+  state.exportWatchdog = setTimeout(() => stopExport(), Math.ceil((span + 1.5) * 1000));
+
   const updateProgress = () => {
     const done = v.currentTime - state.trimStart;
     const pct = Math.max(0, Math.min(100, (done / span) * 100));
@@ -2448,6 +2497,13 @@ $('wmLogo').addEventListener('change', (e) => {
   const r = new FileReader();
   r.onload = (ev) => { const im = new Image(); im.onload = () => { state.watermark.logoImg = im; redrawCover(); }; im.src = ev.target.result; };
   r.readAsDataURL(f);
+});
+
+// Quick-jump nav
+$('step4Nav').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-jump]'); if (!b) return;
+  const t = $(b.dataset.jump);
+  if (t) { if (b.dataset.jump === 'jumpCarousel') t.open = true; t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 });
 
 // Re-center button
