@@ -425,6 +425,43 @@
     max-width: 100%;
     overflow: hidden;
   }
+  .canvas-wrap.drop-hover {
+    outline: 3px dashed #D72638;
+    outline-offset: -8px;
+  }
+  .mode-toggle { display: inline-flex; border: 1.5px solid #0A0A0A; }
+  .mode-btn {
+    background: #FFF; border: none; padding: 8px 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; color: #555;
+  }
+  .mode-btn.active { background: #0A0A0A; color: #FFF; }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+    display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+  }
+  .modal-card {
+    background: #F2EEE3; border: 2px solid #0A0A0A; max-width: 700px; width: 100%;
+    padding: 24px; max-height: 92vh; overflow: auto;
+  }
+  .modal-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.12em; color: #D72638; margin-bottom: 14px;
+  }
+  .trim-timeline {
+    position: relative; height: 46px; background: #d8d2c4;
+    margin-top: 16px; border-radius: 6px; user-select: none; touch-action: none;
+  }
+  .trim-selection {
+    position: absolute; top: 0; bottom: 0; background: rgba(215,38,56,0.28);
+    border-left: 3px solid #D72638; border-right: 3px solid #D72638; box-sizing: border-box;
+  }
+  .trim-handle {
+    position: absolute; top: -4px; width: 16px; height: 54px; margin-left: -8px;
+    background: #D72638; border-radius: 4px; cursor: ew-resize; touch-action: none;
+  }
+  .trim-playhead { position: absolute; top: -4px; bottom: -4px; width: 2px; background: #0A0A0A; pointer-events: none; }
+  .trim-readout { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #0A0A0A; margin-top: 12px; }
   .canvas-wrap canvas {
     width: 100%;
     height: auto;
@@ -667,29 +704,70 @@
 
         <!-- COVER: right column on desktop; sits between hooks and summary on mobile -->
         <div class="cover-col">
-          <div class="section-label">Cover image</div>
+          <div class="section-label">Cover image / video</div>
+
+          <div class="mode-toggle" style="margin-bottom: 12px;">
+            <button class="mode-btn active" id="modeImageBtn" type="button">Image</button>
+            <button class="mode-btn" id="modeVideoBtn" type="button">Video</button>
+          </div>
+
           <div class="canvas-wrap">
             <canvas id="composeCanvas"></canvas>
           </div>
           <div id="canvasWarning"></div>
-          <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">
-            Tip: after zooming, drag the image to reposition it
+          <div id="coverTip" style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">
+            Drag &amp; drop an image here to upload · after zooming, drag to reposition
           </div>
+
+          <div id="videoControls" class="hidden" style="margin-top: 12px;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <button class="btn-tiny" id="vidPlayBtn" type="button">▶ Play</button>
+              <input type="range" id="vidScrub" min="0" max="1000" value="0" style="flex:1; min-width:120px; cursor:pointer; accent-color:#D72638;">
+              <span id="vidTime" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#0A0A0A; min-width:88px; text-align:right;">0:00 / 0:00</span>
+              <button class="btn-tiny" id="vidMuteBtn" type="button" title="Preview audio (export always includes audio)">🔇 Muted</button>
+              <button class="btn-tiny" id="editTrimBtn" type="button">✂ Edit trim</button>
+            </div>
+          </div>
+
           <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <label style="font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #555; white-space: nowrap;">Zoom</label>
             <input type="range" id="imageScale" min="1" max="2" step="0.05" value="1" style="flex: 1; cursor: pointer; accent-color: #D72638;">
             <span id="imageScaleValue" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #0A0A0A; min-width: 36px;">1.0×</span>
-            <button class="btn-tiny" id="recenterBtn" title="Re-center image" style="flex-shrink:0;">⊙ Center</button>
+            <button class="btn-tiny" id="recenterBtn" title="Re-center" style="flex-shrink:0;">⊙ Center</button>
           </div>
           <div class="field" style="margin-top: 14px;">
-            <label class="input-label">Image note / disclaimer (optional — leave blank to remove)</label>
+            <label class="input-label">Note / disclaimer (optional — leave blank to remove)</label>
             <input class="input" id="coverNote" type="text" placeholder="e.g. Image is illustration only, not the actual event" style="font-size: 14px;">
           </div>
+
           <input type="file" id="imageUpload" accept="image/*" class="hidden">
-          <div class="controls-row">
+          <input type="file" id="videoUpload" accept="video/*" class="hidden">
+
+          <div class="controls-row" id="imageActions">
             <button class="btn-secondary" id="imageReplaceBtn">↑ Upload / Replace image</button>
             <button class="btn" id="downloadBtn">↓ Download PNG</button>
           </div>
+          <div class="controls-row hidden" id="videoActions">
+            <button class="btn-secondary" id="videoReplaceBtn">↑ Upload / Replace video</button>
+            <button class="btn" id="exportVideoBtn">⏺ Export video</button>
+          </div>
+
+          <div id="videoExportArea" class="hidden" style="margin-top:12px;">
+            <div id="videoFormatBadge" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#555;"></div>
+            <div id="exportProgressWrap" class="hidden" style="margin-top:10px;">
+              <div style="background:#ddd; height:10px; border-radius:5px; overflow:hidden;">
+                <div id="exportProgressBar" style="background:#D72638; height:100%; width:0%;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                <span id="exportProgressText" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#0A0A0A;">Recording…</span>
+                <button class="btn-tiny" id="exportCancelBtn" type="button">✕ Cancel</button>
+              </div>
+            </div>
+            <div style="margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:9px; line-height:1.6; color:#999; letter-spacing:0.04em; text-transform:uppercase;">
+              Records in real time · keep this tab in front · audio plays &amp; is included · max 60s
+            </div>
+          </div>
+
           <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.1em; text-transform: uppercase;">
             1080 × 1440 · 3:4 portrait
           </div>
@@ -761,6 +839,14 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.9</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Video mode</strong> for the cover: upload/drag a video, <strong>trim</strong> up to 60s, zoom &amp; drag to reposition, then <strong>Export video</strong> (records in real time; MP4 where the browser supports it, else WebM).</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.8</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Drag &amp; drop</strong> an image file straight onto the cover area to upload it — no need to browse your desktop.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.7</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li>New <strong>YouTube transcript</strong> source: paste a transcript and it auto-strips timestamps and [Music] tags. Includes a best-effort auto-fetch button.</li>
@@ -805,7 +891,26 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.7 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.9 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+    </div>
+  </div>
+
+  <div id="trimModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-title">Trim video — pick up to 60 seconds</div>
+      <video id="trimVideo" playsinline muted style="width:100%; max-height:44vh; background:#000; border-radius:6px; display:block;"></video>
+      <div class="trim-timeline" id="trimTrack">
+        <div class="trim-selection" id="trimSelection"></div>
+        <div class="trim-handle" id="trimHandleStart" title="Start"></div>
+        <div class="trim-handle" id="trimHandleEnd" title="End"></div>
+        <div class="trim-playhead" id="trimPlayhead"></div>
+      </div>
+      <div class="trim-readout" id="trimReadout">Selected: 0:00 – 0:00 · 0.0s</div>
+      <div class="controls-row" style="margin-top:16px;">
+        <button class="btn-secondary" id="trimPreviewBtn" type="button">▶ Preview selection</button>
+        <button class="btn-secondary" id="trimCancelBtn" type="button">Cancel</button>
+        <button class="btn" id="trimConfirmBtn" type="button">Use this clip</button>
+      </div>
     </div>
   </div>
 
@@ -1355,11 +1460,13 @@ function coverHookText() {
     : (state.selectedHookIdx === 0 ? state.article.title : state.generated.hooks[state.selectedHookIdx - 1]);
 }
 
-// Lightweight redraw using the already-loaded image (no network reload) — for drag, zoom, note
+// Lightweight redraw using the already-loaded image/video (no network reload) — for drag, zoom, note
 function redrawCover() {
   if (!state.generated || !state.article) return;
   const canvas = $('composeCanvas');
-  if (state.coverImgEl) {
+  if (state.coverMode === 'video' && state.videoEl) {
+    drawComposite(canvas, state.videoEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+  } else if (state.coverMode !== 'video' && state.coverImgEl) {
     drawComposite(canvas, state.coverImgEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
   } else {
     drawComposite(canvas, null, coverHookText(), null, 0, 0);
@@ -1411,10 +1518,13 @@ function renderComposite() {
 
 // Clamp pan offset to valid range for current zoom (no gaps)
 function clampCoverOffset() {
-  if (!state.coverImgEl) return;
+  const src = state.coverMode === 'video' ? state.videoEl : state.coverImgEl;
+  if (!src) return;
   const W = 1080, H = 1440, zoneH = Math.round(H * 0.756);
   const scale = parseFloat(($('imageScale') && $('imageScale').value) || 1);
-  const ia = state.coverImgEl.naturalWidth / state.coverImgEl.naturalHeight, ra = W / zoneH;
+  const iw = src.naturalWidth || src.videoWidth || 1;
+  const ih = src.naturalHeight || src.videoHeight || 1;
+  const ia = iw / ih, ra = W / zoneH;
   let dW, dH;
   if (ia > ra) { dH = zoneH * scale; dW = dH * ia; } else { dW = W * scale; dH = dW / ia; }
   const maxX = Math.max(0, (dW - W) / 2), maxY = Math.max(0, (dH - zoneH) / 2);
@@ -1490,7 +1600,9 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY) {
   // ---- Picture: full-bleed top zone (0,0 → W, splitY), cover-fit + zoom + pan ----
   if (img) {
     const zoneH = splitY;
-    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const iw = img.naturalWidth || img.videoWidth || 1;
+    const ih = img.naturalHeight || img.videoHeight || 1;
+    const imgAspect = iw / ih;
     const rectAspect = W / zoneH;
     const scale = scaleOverride != null ? scaleOverride : parseFloat(($('imageScale') && $('imageScale').value) || 1);
     let dW, dH;
@@ -1606,9 +1718,9 @@ function wrapText(ctx, text, maxWidth) {
 // ============================================================
 // Image upload, download, copy caption
 // ============================================================
-function handleImageUpload(e) {
-  const file = e.target.files && e.target.files[0];
+function loadCoverImageFile(file) {
   if (!file) return;
+  if (!file.type || file.type.indexOf('image/') !== 0) { showToast('That file is not an image'); return; }
   const reader = new FileReader();
   reader.onload = (ev) => {
     state.uploadedImageDataUrl = ev.target.result;
@@ -1619,7 +1731,12 @@ function handleImageUpload(e) {
   };
   reader.onerror = () => showToast('Could not read that image file');
   reader.readAsDataURL(file);
-  e.target.value = '';
+}
+
+function handleImageUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  loadCoverImageFile(file);
+  e.target.value = ''; // allow re-selecting the same file later
 }
 
 function downloadImage() {
@@ -1633,6 +1750,280 @@ function downloadImage() {
   } catch (e) {
     showToast('Download failed — upload your own image');
   }
+}
+
+// ============================================================
+// VIDEO MODE: upload → trim → frame → export (real-time MediaRecorder)
+// ============================================================
+function fmtTime(s) {
+  s = Math.max(0, s || 0);
+  const m = Math.floor(s / 60);
+  const ss = Math.floor(s % 60);
+  return m + ':' + (ss < 10 ? '0' : '') + ss;
+}
+
+function switchCoverMode(mode) {
+  state.coverMode = mode;
+  const isVid = mode === 'video';
+  $('modeImageBtn').classList.toggle('active', !isVid);
+  $('modeVideoBtn').classList.toggle('active', isVid);
+  $('imageActions').classList.toggle('hidden', isVid);
+  $('videoActions').classList.toggle('hidden', !isVid);
+  $('videoControls').classList.toggle('hidden', !isVid);
+  $('videoExportArea').classList.toggle('hidden', !isVid);
+  $('coverTip').textContent = isVid
+    ? 'Drag & drop a video here · after zooming, drag to reposition'
+    : 'Drag & drop an image here to upload · after zooming, drag to reposition';
+  state.coverOffsetX = 0; state.coverOffsetY = 0;
+  if ($('imageScale')) { $('imageScale').value = 1; $('imageScaleValue').textContent = '1.0×'; }
+  stopCoverVideoLoop();
+  if (isVid) {
+    $('videoFormatBadge').textContent = pickExportMime().indexOf('mp4') !== -1
+      ? 'Will export: MP4'
+      : 'Will export: WebM — Facebook may reject it; convert to MP4 first';
+    if (state.videoEl) { drawVideoFrameOnce(); } else { renderComposite(); }
+  } else {
+    renderComposite();
+  }
+}
+
+function loadVideoFile(file) {
+  if (!file) return;
+  if (!file.type || file.type.indexOf('video/') !== 0) { showToast('That file is not a video'); return; }
+  const v = $('trimVideo');
+  if (state.videoObjectUrl) { try { URL.revokeObjectURL(state.videoObjectUrl); } catch (_) {} }
+  state.videoObjectUrl = URL.createObjectURL(file);
+  v.muted = true;
+  v.src = state.videoObjectUrl;
+  v.onloadedmetadata = () => {
+    const dur = v.duration && isFinite(v.duration) ? v.duration : 0;
+    state.trimDur = dur;
+    state.trimStart = 0;
+    state.trimEnd = Math.min(60, dur);
+    openTrimModal();
+  };
+}
+
+// ---- Trim modal ----
+function openTrimModal() {
+  $('trimModal').classList.remove('hidden');
+  const v = $('trimVideo');
+  v.currentTime = state.trimStart;
+  updateTrimUI();
+  trimPlayheadLoop();
+}
+function closeTrimModal() {
+  $('trimModal').classList.add('hidden');
+  const v = $('trimVideo');
+  v.pause();
+  cancelAnimationFrame(state.trimRAF);
+}
+function trimPct(t) { return state.trimDur ? (t / state.trimDur) * 100 : 0; }
+function updateTrimUI() {
+  $('trimSelection').style.left = trimPct(state.trimStart) + '%';
+  $('trimSelection').style.width = (trimPct(state.trimEnd) - trimPct(state.trimStart)) + '%';
+  $('trimHandleStart').style.left = trimPct(state.trimStart) + '%';
+  $('trimHandleEnd').style.left = trimPct(state.trimEnd) + '%';
+  $('trimReadout').textContent = 'Selected: ' + fmtTime(state.trimStart) + ' – ' + fmtTime(state.trimEnd) +
+    ' · ' + (state.trimEnd - state.trimStart).toFixed(1) + 's' +
+    ((state.trimEnd - state.trimStart) >= 59.95 ? '  (max)' : '');
+}
+function trimPlayheadLoop() {
+  const v = $('trimVideo');
+  $('trimPlayhead').style.left = trimPct(v.currentTime) + '%';
+  if (!v.paused && v.currentTime >= state.trimEnd) { v.currentTime = state.trimStart; }
+  state.trimRAF = requestAnimationFrame(trimPlayheadLoop);
+}
+(function setupTrimHandles() {
+  const track = () => $('trimTrack');
+  let dragging = null;
+  const timeFromEvent = (e) => {
+    const r = track().getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    return x * (state.trimDur || 0);
+  };
+  const onMove = (e) => {
+    if (!dragging) return;
+    let t = timeFromEvent(e);
+    if (dragging === 'start') {
+      t = Math.min(t, state.trimEnd - 0.1);
+      t = Math.max(t, state.trimEnd - 60); // keep window <= 60s
+      state.trimStart = Math.max(0, t);
+    } else {
+      t = Math.max(t, state.trimStart + 0.1);
+      t = Math.min(t, state.trimStart + 60); // keep window <= 60s
+      state.trimEnd = Math.min(state.trimDur, t);
+    }
+    const vv = $('trimVideo'); vv.currentTime = (dragging === 'start') ? state.trimStart : state.trimEnd;
+    updateTrimUI();
+    e.preventDefault();
+  };
+  const stop = () => { dragging = null; };
+  document.addEventListener('DOMContentLoaded', () => {});
+  // attach after elements exist (script runs at end of body, so they exist)
+  const hs = document.getElementById('trimHandleStart');
+  const he = document.getElementById('trimHandleEnd');
+  if (hs && he) {
+    hs.addEventListener('pointerdown', (e) => { dragging = 'start'; try { hs.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); });
+    he.addEventListener('pointerdown', (e) => { dragging = 'end'; try { he.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); });
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+  }
+})();
+function previewTrimSelection() {
+  const v = $('trimVideo');
+  v.currentTime = state.trimStart;
+  v.muted = false;
+  v.play().catch(() => {});
+}
+function confirmTrim() {
+  closeTrimModal();
+  const v = $('trimVideo');
+  v.muted = true;
+  state.videoEl = v;
+  state.coverOffsetX = 0; state.coverOffsetY = 0;
+  if ($('imageScale')) { $('imageScale').value = 1; $('imageScaleValue').textContent = '1.0×'; }
+  v.currentTime = state.trimStart;
+  $('canvasWarning').innerHTML = '';
+  updateVidTimeLabel();
+  drawVideoFrameOnce();
+  showToast('Clip ready (' + (state.trimEnd - state.trimStart).toFixed(1) + 's)');
+}
+
+// ---- Cover video preview ----
+function drawVideoFrameOnce() {
+  if (!state.videoEl) return;
+  drawComposite($('composeCanvas'), state.videoEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+  updateVidScrub();
+}
+function coverVideoLoop() {
+  const v = state.videoEl;
+  if (!v) return;
+  if (v.currentTime >= state.trimEnd) { v.currentTime = state.trimStart; }
+  drawComposite($('composeCanvas'), v, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+  updateVidScrub();
+  if (!v.paused && !state.exporting) state.videoRAF = requestAnimationFrame(coverVideoLoop);
+}
+function stopCoverVideoLoop() {
+  cancelAnimationFrame(state.videoRAF);
+  if (state.videoEl && state.coverMode === 'video') { try { state.videoEl.pause(); } catch (_) {} }
+  if ($('vidPlayBtn')) $('vidPlayBtn').textContent = '▶ Play';
+}
+function toggleVideoPlay() {
+  const v = state.videoEl; if (!v) { showToast('Upload a video first'); return; }
+  if (v.paused) {
+    if (v.currentTime < state.trimStart || v.currentTime >= state.trimEnd) v.currentTime = state.trimStart;
+    v.play().then(() => { $('vidPlayBtn').textContent = '❚❚ Pause'; coverVideoLoop(); }).catch(() => {});
+  } else {
+    v.pause(); $('vidPlayBtn').textContent = '▶ Play'; drawVideoFrameOnce();
+  }
+}
+function updateVidScrub() {
+  const v = state.videoEl; if (!v) return;
+  const span = (state.trimEnd - state.trimStart) || 1;
+  const rel = Math.max(0, Math.min(1, (v.currentTime - state.trimStart) / span));
+  if (!state.scrubbing) $('vidScrub').value = Math.round(rel * 1000);
+  updateVidTimeLabel();
+}
+function updateVidTimeLabel() {
+  const v = state.videoEl; if (!v) return;
+  const rel = Math.max(0, v.currentTime - state.trimStart);
+  $('vidTime').textContent = fmtTime(rel) + ' / ' + fmtTime(state.trimEnd - state.trimStart);
+}
+
+// ---- Export (real-time recording) ----
+function pickExportMime() {
+  const cands = ['video/mp4;codecs=h264,aac', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+  if (!window.MediaRecorder) return '';
+  for (let i = 0; i < cands.length; i++) { try { if (MediaRecorder.isTypeSupported(cands[i])) return cands[i]; } catch (_) {} }
+  return '';
+}
+function finishExportUI() {
+  $('exportProgressWrap').classList.add('hidden');
+  $('exportVideoBtn').disabled = false;
+  $('exportProgressBar').style.width = '0%';
+  state.exporting = false;
+}
+function stopExport() {
+  state.exporting = false;
+  if (state.videoEl) { try { state.videoEl.pause(); } catch (_) {} }
+  if (state.recorder && state.recorder.state !== 'inactive') { try { state.recorder.stop(); } catch (_) {} }
+}
+async function exportVideo() {
+  const v = state.videoEl;
+  if (!v) { showToast('Upload a video first'); return; }
+  const canvas = $('composeCanvas');
+  if (!window.MediaRecorder || !canvas.captureStream) {
+    showError($('canvasWarning'), 'This browser can’t record video. Use Image mode → transparent PNG → your video editor instead.');
+    return;
+  }
+  stopCoverVideoLoop();
+  state.exportCancelled = false;
+  state.exporting = true;
+  $('vidPlayBtn').textContent = '▶ Play';
+
+  const mime = pickExportMime();
+  const stream = canvas.captureStream(30);
+  const prevMuted = v.muted;
+  v.muted = false; // ensure audio track is captured (audio will play during export)
+  try {
+    const vs = v.captureStream ? v.captureStream() : (v.mozCaptureStream ? v.mozCaptureStream() : null);
+    if (vs) { const at = vs.getAudioTracks()[0]; if (at) stream.addTrack(at); }
+  } catch (_) {}
+
+  const chunks = [];
+  let rec;
+  try { rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream); }
+  catch (e) { rec = new MediaRecorder(stream); }
+  state.recorder = rec;
+  rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    v.muted = prevMuted;
+    finishExportUI();
+    if (!state.exportCancelled && chunks.length) {
+      const type = rec.mimeType || mime || 'video/webm';
+      const ext = type.indexOf('mp4') !== -1 ? 'mp4' : 'webm';
+      const blob = new Blob(chunks, { type: type });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'newsforge-' + Date.now() + '.' + ext;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+      showToast('Video exported (' + ext.toUpperCase() + ')');
+    } else if (state.exportCancelled) {
+      showToast('Export cancelled');
+    }
+    drawVideoFrameOnce();
+  };
+
+  v.currentTime = state.trimStart;
+  $('exportProgressWrap').classList.remove('hidden');
+  $('exportVideoBtn').disabled = true;
+  $('exportProgressBar').style.width = '0%';
+  $('exportProgressText').textContent = 'Starting…';
+
+  try { rec.start(100); } catch (e) { finishExportUI(); showError($('canvasWarning'), 'Could not start recording: ' + e.message); return; }
+  await v.play().catch(() => {});
+
+  const span = (state.trimEnd - state.trimStart) || 1;
+  const loop = () => {
+    if (!state.exporting) return;
+    drawComposite(canvas, v, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+    const done = v.currentTime - state.trimStart;
+    const pct = Math.max(0, Math.min(100, (done / span) * 100));
+    $('exportProgressBar').style.width = pct.toFixed(1) + '%';
+    $('exportProgressText').textContent = 'Recording… ' + fmtTime(done) + ' / ' + fmtTime(span);
+    if (v.currentTime >= state.trimEnd || v.ended) { stopExport(); return; }
+    state.videoRAF = requestAnimationFrame(loop);
+  };
+  state.videoRAF = requestAnimationFrame(loop);
+}
+
+function loadVideoUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  loadVideoFile(file);
+  e.target.value = '';
 }
 
 function buildCaption() {
@@ -1753,6 +2144,13 @@ function saveAndNew() {
   state.uploadedImageDataUrl = null;
   state.selectedHookIdx = 1;
   state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverNote = '';
+  // reset video mode
+  stopExport();
+  stopCoverVideoLoop();
+  state.videoEl = null; state.trimStart = 0; state.trimEnd = 0; state.trimDur = 0;
+  if (state.videoObjectUrl) { try { URL.revokeObjectURL(state.videoObjectUrl); } catch (_) {} state.videoObjectUrl = null; }
+  if ($('trimVideo')) { $('trimVideo').removeAttribute('src'); $('trimVideo').load && $('trimVideo').load(); }
+  switchCoverMode('image');
   $('urlInput').value = '';
   $('manualTitle').value = '';
   $('manualBody').value = '';
@@ -1794,6 +2192,33 @@ $('parseBtn').addEventListener('click', parseResponse);
 $('imageReplaceBtn').addEventListener('click', () => $('imageUpload').click());
 $('imageUpload').addEventListener('change', handleImageUpload);
 $('downloadBtn').addEventListener('click', downloadImage);
+
+// --- Video mode wiring ---
+$('modeImageBtn').addEventListener('click', () => switchCoverMode('image'));
+$('modeVideoBtn').addEventListener('click', () => switchCoverMode('video'));
+$('videoReplaceBtn').addEventListener('click', () => $('videoUpload').click());
+$('videoUpload').addEventListener('change', loadVideoUpload);
+$('vidPlayBtn').addEventListener('click', toggleVideoPlay);
+$('vidMuteBtn').addEventListener('click', () => {
+  if (!state.videoEl) return;
+  state.videoEl.muted = !state.videoEl.muted;
+  $('vidMuteBtn').textContent = state.videoEl.muted ? '🔇 Muted' : '🔊 Sound';
+});
+$('editTrimBtn').addEventListener('click', () => { if (state.videoEl) openTrimModal(); });
+$('vidScrub').addEventListener('pointerdown', () => { state.scrubbing = true; });
+$('vidScrub').addEventListener('input', () => {
+  const v = state.videoEl; if (!v) return;
+  const span = (state.trimEnd - state.trimStart) || 1;
+  v.currentTime = state.trimStart + (parseFloat($('vidScrub').value) / 1000) * span;
+  if (v.paused) drawVideoFrameOnce(); else updateVidTimeLabel();
+});
+$('vidScrub').addEventListener('change', () => { state.scrubbing = false; });
+$('exportVideoBtn').addEventListener('click', exportVideo);
+$('exportCancelBtn').addEventListener('click', () => { state.exportCancelled = true; stopExport(); });
+$('trimPreviewBtn').addEventListener('click', previewTrimSelection);
+$('trimConfirmBtn').addEventListener('click', confirmTrim);
+$('trimCancelBtn').addEventListener('click', closeTrimModal);
+
 $('copyCaptionBtn').addEventListener('click', copyCaption);
 $('copyImagePromptBtn').addEventListener('click', copyImagePrompt);
 $('downloadAllSlidesBtn').addEventListener('click', downloadAllSlides);
@@ -1864,6 +2289,36 @@ $('recenterBtn').addEventListener('click', () => {
   cc.addEventListener('pointerup', end);
   cc.addEventListener('pointercancel', end);
   cc.addEventListener('pointerleave', end);
+})();
+
+// Drag & drop an image file onto the cover zone (uses native file-drag events, separate from pan)
+(function setupCoverDrop() {
+  const cc = $('composeCanvas');
+  const zone = cc ? cc.closest('.canvas-wrap') : null;
+  if (!zone) return;
+  const hasFiles = (e) => e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') !== -1;
+
+  ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault(); e.stopPropagation();
+    zone.classList.add('drop-hover');
+  }));
+  ['dragleave', 'dragend'].forEach(ev => zone.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    zone.classList.remove('drop-hover');
+  }));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    zone.classList.remove('drop-hover');
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!file) return;
+    if (state.coverMode === 'video') loadVideoFile(file);
+    else loadCoverImageFile(file);
+  });
+
+  // Stop the browser from opening a dropped image (which would navigate away from the app)
+  window.addEventListener('dragover', (e) => { if (hasFiles(e)) e.preventDefault(); });
+  window.addEventListener('drop', (e) => { if (hasFiles(e) && !zone.contains(e.target)) e.preventDefault(); });
 })();
 
 renderHistory();
