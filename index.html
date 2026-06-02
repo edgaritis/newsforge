@@ -536,6 +536,8 @@
     /* zoom + center row wraps instead of squeezing */
     .canvas-wrap { padding: 10px; }
   }
+  .btn-tiny.active { background: #0A0A0A; color: #fff; border-color: #0A0A0A; }
+  #colorPresets .cp:hover { transform: scale(1.12); }
 </style>
 </head>
 <body>
@@ -740,15 +742,61 @@
             <input class="input" id="coverNote" type="text" placeholder="e.g. Image is illustration only, not the actual event" style="font-size: 14px;">
           </div>
 
+          <details id="designPanel" style="margin-top: 14px; border: 1.5px solid #D5CFC1; background: #FFF;">
+            <summary style="cursor: pointer; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Design — layout, colours, watermark</summary>
+            <div style="padding: 6px 16px 18px;">
+              <div class="input-label" style="margin-top: 8px;">Layout</div>
+              <div class="row" id="layoutPicker" style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button type="button" class="btn-tiny lay active" data-layout="A">A · Straddle</button>
+                <button type="button" class="btn-tiny lay" data-layout="B">B · Top box</button>
+                <button type="button" class="btn-tiny lay" data-layout="C">C · Lower-third</button>
+                <button type="button" class="btn-tiny lay" data-layout="D">D · Over image</button>
+              </div>
+
+              <div class="input-label" style="margin-top: 16px;">Colours</div>
+              <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
+                <input type="color" id="colPrimary" value="#0d52b0" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Primary (zone / bar)
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
+                <input type="color" id="colAccent" value="#4ec6e2" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Accent (glow / line)
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                <input type="color" id="colText" value="#0a0a0a" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Hook text
+              </div>
+              <div class="input-label" style="margin-top: 12px;">Presets</div>
+              <div class="row" id="colorPresets" style="display:flex; gap:8px;">
+                <span class="cp" data-p="#0d52b0,#4ec6e2,#0a0a0a" title="Blue" style="width:26px;height:26px;border-radius:50%;background:#0d52b0;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
+                <span class="cp" data-p="#c0392b,#f39c12,#ffffff" title="Red/amber" style="width:26px;height:26px;border-radius:50%;background:#c0392b;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
+                <span class="cp" data-p="#16a085,#a3e4d7,#0a0a0a" title="Teal" style="width:26px;height:26px;border-radius:50%;background:#16a085;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
+                <span class="cp" data-p="#1c2833,#5d6d7e,#ffffff" title="Charcoal" style="width:26px;height:26px;border-radius:50%;background:#1c2833;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
+                <span class="cp" data-p="#7d3c98,#d2b4de,#ffffff" title="Purple" style="width:26px;height:26px;border-radius:50%;background:#7d3c98;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
+              </div>
+
+              <div class="input-label" style="margin-top: 16px;">Watermark (page handle)</div>
+              <input class="input" id="wmText" type="text" placeholder="@YourPage (leave blank for none)" style="font-size:14px;">
+              <div class="row" id="wmPosPicker" style="display:flex; gap:6px; margin-top:8px;">
+                <button type="button" class="btn-tiny wmpos" data-pos="tl">Top L</button>
+                <button type="button" class="btn-tiny wmpos" data-pos="tr">Top R</button>
+                <button type="button" class="btn-tiny wmpos" data-pos="bl">Bot L</button>
+                <button type="button" class="btn-tiny wmpos active" data-pos="br">Bot R</button>
+              </div>
+              <div style="margin-top:8px;"><span class="input-label">Opacity</span><input type="range" id="wmOpacity" min="0" max="100" value="75" style="width:100%; accent-color:#D72638;"></div>
+              <div style="margin-top:6px;"><span class="input-label">Size</span><input type="range" id="wmSize" min="16" max="54" value="28" style="width:100%; accent-color:#D72638;"></div>
+              <div style="margin-top:10px; font-size:12px; color:#666;">Optional logo image (replaces text): <input type="file" id="wmLogo" accept="image/*"></div>
+            </div>
+          </details>
+
           <input type="file" id="imageUpload" accept="image/*" class="hidden">
           <input type="file" id="videoUpload" accept="video/*" class="hidden">
 
           <div class="controls-row" id="imageActions">
             <button class="btn-secondary" id="imageReplaceBtn">↑ Upload / Replace image</button>
+            <button class="btn-secondary" id="clearCoverBtn">✕ Clear</button>
             <button class="btn" id="downloadBtn">↓ Download PNG</button>
           </div>
           <div class="controls-row hidden" id="videoActions">
             <button class="btn-secondary" id="videoReplaceBtn">↑ Upload / Replace video</button>
+            <button class="btn-secondary" id="clearCoverBtnVid">✕ Clear</button>
             <button class="btn" id="exportVideoBtn">⏺ Export video</button>
           </div>
 
@@ -839,6 +887,15 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.11</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Design panel</strong> on the cover: pick from <strong>4 layouts</strong> (Straddle / Top box / Lower-third / Over image), recolour (primary / accent / text + presets), and add a <strong>watermark</strong> (page handle text or logo, with position &amp; opacity). Applies to image and video; resets fresh each post.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.10</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Clear button</strong> to remove the uploaded image/video and return the cover to transparent.</li>
+          <li>Video export now stays <strong>in sync with audio</strong> (frame-accurate capture).</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.9</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Video mode</strong> for the cover: upload/drag a video, <strong>trim</strong> up to 60s, zoom &amp; drag to reposition, then <strong>Export video</strong> (records in real time; MP4 where the browser supports it, else WebM).</li>
@@ -891,7 +948,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.9 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.11 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -926,6 +983,9 @@ const state = {
   generated: null,
   selectedHookIdx: 1,
   uploadedImageDataUrl: null,
+  coverLayout: 'A',
+  colors: { primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a' },
+  watermark: { text: '', logoImg: null, pos: 'br', opacity: 75, size: 28 },
 };
 
 const HOOK_LABELS = [
@@ -1266,7 +1326,7 @@ function parseResponse() {
   state.generated = parsed;
   state.selectedHookIdx = 1;
   state.editableHooks = [state.article.title, ...parsed.hooks];
-  state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null;
+  state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverCleared = false;
   renderStep4();
 }
 
@@ -1465,11 +1525,11 @@ function redrawCover() {
   if (!state.generated || !state.article) return;
   const canvas = $('composeCanvas');
   if (state.coverMode === 'video' && state.videoEl) {
-    drawComposite(canvas, state.videoEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+    drawComposite(canvas, state.videoEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0, coverDesign());
   } else if (state.coverMode !== 'video' && state.coverImgEl) {
-    drawComposite(canvas, state.coverImgEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+    drawComposite(canvas, state.coverImgEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0, coverDesign());
   } else {
-    drawComposite(canvas, null, coverHookText(), null, 0, 0);
+    drawComposite(canvas, null, coverHookText(), null, 0, 0, coverDesign());
   }
 }
 
@@ -1477,13 +1537,13 @@ function renderComposite() {
   if (!state.generated || !state.article) return;
   const canvas = $('composeCanvas');
   const hookText = coverHookText();
-  const imageSource = state.uploadedImageDataUrl || state.article.heroImage;
+  const imageSource = state.coverCleared ? null : (state.uploadedImageDataUrl || state.article.heroImage);
 
   $('canvasWarning').innerHTML = '';
   state.coverImgEl = null;
 
   if (!imageSource) {
-    drawComposite(canvas, null, hookText, null, 0, 0);
+    drawComposite(canvas, null, hookText, null, 0, 0, coverDesign());
     $('canvasWarning').innerHTML = '<div class="note" style="margin-top: 10px;">Picture area is transparent (checkerboard = see-through). Download as PNG and drop your footage behind it in your video editor — or upload an image below to bake one in.</div>';
     return;
   }
@@ -1494,7 +1554,7 @@ function renderComposite() {
 
   const tryProxy = () => {
     if (isDataUrl || triedProxy) {
-      drawComposite(canvas, null, hookText, null, 0, 0);
+      drawComposite(canvas, null, hookText, null, 0, 0, coverDesign());
       $('canvasWarning').innerHTML = '<div class="error" style="margin-top: 12px;">Could not load this image. Try a different file.</div>';
       return;
     }
@@ -1506,7 +1566,7 @@ function renderComposite() {
   img.onload = () => {
     try {
       state.coverImgEl = img;
-      drawComposite(canvas, img, hookText, null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+      drawComposite(canvas, img, hookText, null, state.coverOffsetX || 0, state.coverOffsetY || 0, coverDesign());
     } catch (e) {
       tryProxy();
     }
@@ -1520,14 +1580,15 @@ function renderComposite() {
 function clampCoverOffset() {
   const src = state.coverMode === 'video' ? state.videoEl : state.coverImgEl;
   if (!src) return;
-  const W = 1080, H = 1440, zoneH = Math.round(H * 0.756);
+  const W = 1080, H = 1440;
+  const rect = pictureRect(state.coverLayout || 'A', W, H);
   const scale = parseFloat(($('imageScale') && $('imageScale').value) || 1);
   const iw = src.naturalWidth || src.videoWidth || 1;
   const ih = src.naturalHeight || src.videoHeight || 1;
-  const ia = iw / ih, ra = W / zoneH;
+  const ia = iw / ih, ra = rect.w / rect.h;
   let dW, dH;
-  if (ia > ra) { dH = zoneH * scale; dW = dH * ia; } else { dW = W * scale; dH = dW / ia; }
-  const maxX = Math.max(0, (dW - W) / 2), maxY = Math.max(0, (dH - zoneH) / 2);
+  if (ia > ra) { dH = rect.h * scale; dW = dH * ia; } else { dW = rect.w * scale; dH = dW / ia; }
+  const maxX = Math.max(0, (dW - rect.w) / 2), maxY = Math.max(0, (dH - rect.h) / 2);
   state.coverOffsetX = Math.max(-maxX, Math.min(maxX, state.coverOffsetX || 0));
   state.coverOffsetY = Math.max(-maxY, Math.min(maxY, state.coverOffsetY || 0));
 }
@@ -1577,110 +1638,151 @@ function drawTextSlide(canvas, text, slideNum) {
   lines.forEach((l, i) => ctx.fillText(l, W / 2, startY + i * lineHeight));
 }
 
-function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY) {
-  const W = 1080;
-  const H = 1440; // 3:4 portrait, forced
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
+const DEFAULT_COLORS = { primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a' };
 
-  const splitY = Math.round(H * 0.756); // picture(top) / blue(bottom) boundary
+function coverDesign() {
+  return {
+    layout: state.coverLayout || 'A',
+    colors: state.colors || DEFAULT_COLORS,
+    watermark: state.watermark || null,
+    note: (state.coverNote || '').trim()
+  };
+}
 
-  // ---- Transparent base so the empty picture area exports as a transparent window ----
-  ctx.clearRect(0, 0, W, H);
+function hexToRgb(hex) { const n = parseInt(String(hex).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function rgba(hex, a) { const c = hexToRgb(hex); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+function shadeHex(hex, p) { const c = hexToRgb(hex).map(v => Math.max(0, Math.min(255, Math.round(v + v * p)))); return `rgb(${c[0]},${c[1]},${c[2]})`; }
+function isDark(hex) { return String(hex).toLowerCase() === '#0a0a0a'; }
 
-  // ---- Blue ONLY in the bottom zone (top picture zone stays transparent when no image) ----
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, splitY, W, H - splitY);
-  ctx.clip();
-  drawBlueBackground(ctx, W, H);
-  ctx.restore();
+// Picture region per layout (3:4 canvas)
+function pictureRect(layout, W, H) {
+  if (layout === 'A') return { x: 0, y: 0, w: W, h: Math.round(H * 0.756) };
+  if (layout === 'B') return { x: 0, y: Math.round(H * 0.244), w: W, h: H - Math.round(H * 0.244) };
+  return { x: 0, y: 0, w: W, h: H }; // C, D full-bleed
+}
 
-  // ---- Picture: full-bleed top zone (0,0 → W, splitY), cover-fit + zoom + pan ----
-  if (img) {
-    const zoneH = splitY;
-    const iw = img.naturalWidth || img.videoWidth || 1;
-    const ih = img.naturalHeight || img.videoHeight || 1;
-    const imgAspect = iw / ih;
-    const rectAspect = W / zoneH;
-    const scale = scaleOverride != null ? scaleOverride : parseFloat(($('imageScale') && $('imageScale').value) || 1);
-    let dW, dH;
-    if (imgAspect > rectAspect) {
-      dH = zoneH * scale;
-      dW = dH * imgAspect;
-    } else {
-      dW = W * scale;
-      dH = dW / imgAspect;
-    }
-    // clamp pan so the picture always covers the zone (no gaps)
-    const maxX = Math.max(0, (dW - W) / 2);
-    const maxY = Math.max(0, (dH - zoneH) / 2);
-    const oX = Math.max(-maxX, Math.min(maxX, offsetX || 0));
-    const oY = Math.max(-maxY, Math.min(maxY, offsetY || 0));
-    const dX = (W - dW) / 2 + oX;
-    const dY = (zoneH - dH) / 2 + oY;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, W, zoneH);
-    ctx.clip();
-    ctx.drawImage(img, dX, dY, dW, dH);
-    ctx.restore();
-  }
-  // else: leave the picture zone fully TRANSPARENT (no fill, no text) so it exports clean
+// Draw picture cover-fit + zoom + pan into a rect; leave transparent if no image
+function drawPictureInRect(ctx, img, rect, scale, offX, offY) {
+  if (!img) return;
+  const iw = img.naturalWidth || img.videoWidth || 1;
+  const ih = img.naturalHeight || img.videoHeight || 1;
+  const ia = iw / ih, ra = rect.w / rect.h;
+  let dW, dH;
+  if (ia > ra) { dH = rect.h * scale; dW = dH * ia; } else { dW = rect.w * scale; dH = dW / ia; }
+  const maxX = Math.max(0, (dW - rect.w) / 2), maxY = Math.max(0, (dH - rect.h) / 2);
+  const oX = Math.max(-maxX, Math.min(maxX, offX || 0)), oY = Math.max(-maxY, Math.min(maxY, offY || 0));
+  const dX = rect.x + (rect.w - dW) / 2 + oX, dY = rect.y + (rect.h - dH) / 2 + oY;
+  ctx.save(); ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
+  ctx.drawImage(img, dX, dY, dW, dH); ctx.restore();
+}
 
-  // ---- Optional note / disclaimer (small chip, top-left of picture) ----
-  const note = (state.coverNote || '').trim();
-  if (note) {
-    ctx.font = '600 24px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    const tw = ctx.measureText(note).width;
-    const padX = 18, padY = 11, chipX = 28, chipY = 28, chipH = 24 + padY * 2;
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    roundRectPath(ctx, chipX, chipY, tw + padX * 2, chipH, 8);
-    ctx.fill();
-    ctx.restore();
-    ctx.fillStyle = 'rgba(255,255,255,0.96)';
-    ctx.fillText(note, chipX + padX, chipY + chipH / 2 + 1);
-  }
+function drawColorZone(ctx, x, y, w, h, primary, accent, glowAtTop) {
+  const g = ctx.createLinearGradient(x, y, x, y + h);
+  g.addColorStop(0, shadeHex(primary, -0.25)); g.addColorStop(1, primary);
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  const gy = glowAtTop ? y + h * 0.05 : y + h * 0.98, gx = x + w / 2, gr = w * 0.62;
+  const rg = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+  rg.addColorStop(0, rgba(accent, 0.95)); rg.addColorStop(0.6, rgba(accent, 0.35)); rg.addColorStop(1, rgba(accent, 0));
+  ctx.fillStyle = rg; ctx.fillRect(x, y, w, h);
+}
 
-  // ---- White box straddling the split (top half over picture, bottom half over blue) ----
-  const boxX = 44;
-  const boxW = W - 88;
-  const boxTop = Math.round(H * 0.635);   // 915
-  const boxBottom = Math.round(H * 0.935); // 1346
-  const boxH = boxBottom - boxTop;
-  const radius = 8;
+function drawWhiteBox(ctx, x, y, w, h) {
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 34; ctx.shadowOffsetY = 10;
+  roundRectPath(ctx, x, y, w, h, 8); ctx.fillStyle = '#FFFFFF'; ctx.fill(); ctx.restore();
+}
 
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.28)';
-  ctx.shadowBlur = 34;
-  ctx.shadowOffsetY = 10;
-  roundRectPath(ctx, boxX, boxTop, boxW, boxH, radius);
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fill();
-  ctx.restore();
-
-  // ---- Hook text (auto-shrinks to fit the box) ----
-  const innerPad = 56;
-  let fontSize = 58;
-  let lines, lineHeight;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+function fitHook(ctx, text, maxW, maxH, maxSize, weight) {
+  let fs = maxSize, lines, lh;
   for (;;) {
-    ctx.font = `900 ${fontSize}px "Inter", "Arial Black", sans-serif`;
-    lines = wrapText(ctx, hookText, boxW - innerPad * 2);
-    lineHeight = fontSize * 1.16;
-    if (lines.length * lineHeight <= boxH - 50 || fontSize <= 30) break;
-    fontSize -= 2;
+    ctx.font = `${weight} ${fs}px "Inter", "Arial Black", sans-serif`;
+    lines = wrapText(ctx, text, maxW); lh = fs * 1.16;
+    if (lines.length * lh <= maxH - 16 || fs <= 30) break; fs -= 2;
   }
-  ctx.fillStyle = '#0A0A0A';
-  const textStartY = boxTop + boxH / 2 - ((lines.length - 1) * lineHeight) / 2;
-  lines.forEach((line, i) => {
-    ctx.fillText(line, W / 2, textStartY + i * lineHeight);
-  });
+  return { lines, lh };
+}
+
+function drawNoteChip(ctx, note, W) {
+  ctx.font = '600 24px Inter, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  const tw = ctx.measureText(note).width, padX = 18, padY = 11, chipX = 28, chipY = 28, chipH = 24 + padY * 2;
+  ctx.save(); ctx.fillStyle = 'rgba(0,0,0,0.55)'; roundRectPath(ctx, chipX, chipY, tw + padX * 2, chipH, 8); ctx.fill(); ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fillText(note, chipX + padX, chipY + chipH / 2 + 1);
+}
+
+function drawWatermark(ctx, wm, W, H) {
+  if (!wm) return;
+  const pos = wm.pos || 'br', m = 40, op = (wm.opacity != null ? wm.opacity : 75) / 100, size = wm.size || 28;
+  if (op <= 0) return;
+  ctx.save(); ctx.globalAlpha = op;
+  if (wm.logoImg) {
+    const lh = size * 2.2, lw = lh * ((wm.logoImg.naturalWidth || 1) / (wm.logoImg.naturalHeight || 1));
+    const x = pos.indexOf('r') !== -1 ? W - m - lw : m, y = pos.indexOf('b') !== -1 ? H - m - lh : m;
+    ctx.drawImage(wm.logoImg, x, y, lw, lh);
+  } else if (wm.text) {
+    ctx.font = `700 ${size}px Inter, sans-serif`;
+    ctx.textBaseline = pos.indexOf('b') !== -1 ? 'bottom' : 'top';
+    ctx.textAlign = pos.indexOf('r') !== -1 ? 'right' : 'left';
+    const x = pos.indexOf('r') !== -1 ? W - m : m, y = pos.indexOf('b') !== -1 ? H - m : m;
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff'; ctx.fillText(wm.text, x, y);
+  }
+  ctx.restore();
+}
+
+function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY, design) {
+  const W = 1080, H = 1440; canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, W, H);
+  const d = design || { layout: 'A', colors: DEFAULT_COLORS, watermark: null, note: '' };
+  const col = d.colors || DEFAULT_COLORS;
+  const L = d.layout || 'A';
+  const scale = scaleOverride != null ? scaleOverride : parseFloat(($('imageScale') && $('imageScale').value) || 1);
+  const ox = offsetX || 0, oy = offsetY || 0;
+  const rect = pictureRect(L, W, H);
+
+  if (L === 'A' || L === 'B') {
+    if (L === 'A') {
+      ctx.save(); ctx.beginPath(); ctx.rect(0, rect.h, W, H - rect.h); ctx.clip();
+      drawColorZone(ctx, 0, 0, W, H, col.primary, col.accent, false); ctx.restore();
+    } else {
+      const bz = Math.round(H * 0.244);
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, bz); ctx.clip();
+      drawColorZone(ctx, 0, 0, W, H, col.primary, col.accent, true); ctx.restore();
+    }
+    drawPictureInRect(ctx, img, rect, scale, ox, oy);
+    const bx = 44, bw = W - 88;
+    const bt = L === 'A' ? Math.round(H * 0.635) : Math.round(H * 0.065);
+    const bb = L === 'A' ? Math.round(H * 0.935) : Math.round(H * 0.365);
+    drawWhiteBox(ctx, bx, bt, bw, bb - bt);
+    const r = fitHook(ctx, hookText, bw - 112, bb - bt, 58, '900');
+    ctx.fillStyle = col.text || '#0a0a0a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const sy = (bt + bb) / 2 - ((r.lines.length - 1) * r.lh) / 2;
+    r.lines.forEach((l, i) => ctx.fillText(l, W / 2, sy + i * r.lh));
+  } else if (L === 'C') {
+    drawPictureInRect(ctx, img, rect, scale, ox, oy);
+    const barTop = Math.round(H * 0.45);
+    const g = ctx.createLinearGradient(0, barTop, 0, H);
+    g.addColorStop(0, rgba(col.primary, 0)); g.addColorStop(0.55, rgba(col.primary, 0.85)); g.addColorStop(1, rgba(col.primary, 0.98));
+    ctx.fillStyle = g; ctx.fillRect(0, barTop, W, H - barTop);
+    ctx.fillStyle = col.accent; ctx.fillRect(60, Math.round(H * 0.66), 90, 8);
+    const tc = isDark(col.text) ? '#ffffff' : col.text;
+    const r = fitHook(ctx, hookText, W - 120, H * 0.26, 64, '800');
+    ctx.fillStyle = tc; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    r.lines.forEach((l, i) => ctx.fillText(l, 60, H - 70 - (r.lines.length - 1 - i) * r.lh));
+  } else if (L === 'D') {
+    drawPictureInRect(ctx, img, rect, scale, ox, oy);
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, 'rgba(0,0,0,0.15)'); g.addColorStop(0.5, 'rgba(0,0,0,0.45)'); g.addColorStop(1, 'rgba(0,0,0,0.7)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = col.accent; ctx.fillRect(W / 2 - 50, Math.round(H * 0.34), 100, 8);
+    const tc = isDark(col.text) ? '#ffffff' : col.text;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 18;
+    const r = fitHook(ctx, hookText, W - 150, H * 0.34, 76, '900');
+    ctx.fillStyle = tc; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const cy = H * 0.57, sy = cy - ((r.lines.length - 1) * r.lh) / 2;
+    r.lines.forEach((l, i) => ctx.fillText(l, W / 2, sy + i * r.lh));
+    ctx.restore();
+  }
+
+  if (d.note) drawNoteChip(ctx, d.note, W);
+  if (d.watermark) drawWatermark(ctx, d.watermark, W, H);
 }
 
 function roundRectPath(ctx, x, y, w, h, r) {
@@ -1724,6 +1826,7 @@ function loadCoverImageFile(file) {
   const reader = new FileReader();
   reader.onload = (ev) => {
     state.uploadedImageDataUrl = ev.target.result;
+    state.coverCleared = false;
     state.coverOffsetX = 0; state.coverOffsetY = 0; // re-center new image
     if ($('imageScale')) { $('imageScale').value = 1; $('imageScaleValue').textContent = '1.0×'; }
     renderComposite(); // cover only — carousel slide 1 is independent
@@ -1891,17 +1994,39 @@ function confirmTrim() {
   showToast('Clip ready (' + (state.trimEnd - state.trimStart).toFixed(1) + 's)');
 }
 
+// Clear the uploaded image/video → return the picture area to transparent
+function clearCover() {
+  if (state.coverMode === 'video') {
+    stopCoverVideoLoop();
+    state.videoEl = null;
+    state.trimStart = 0; state.trimEnd = 0; state.trimDur = 0;
+    if (state.videoObjectUrl) { try { URL.revokeObjectURL(state.videoObjectUrl); } catch (_) {} state.videoObjectUrl = null; }
+    const tv = $('trimVideo'); if (tv) { try { tv.pause(); tv.removeAttribute('src'); tv.load(); } catch (_) {} }
+    if ($('vidPlayBtn')) $('vidPlayBtn').textContent = '▶ Play';
+    if ($('vidTime')) $('vidTime').textContent = '0:00 / 0:00';
+    if ($('vidScrub')) $('vidScrub').value = 0;
+  } else {
+    state.uploadedImageDataUrl = null;
+    state.coverImgEl = null;
+    state.coverCleared = true; // keep transparent even if the article had an auto-fetched image
+  }
+  state.coverOffsetX = 0; state.coverOffsetY = 0;
+  if ($('imageScale')) { $('imageScale').value = 1; $('imageScaleValue').textContent = '1.0×'; }
+  redrawCover();
+  showToast('Cleared — picture area is transparent');
+}
+
 // ---- Cover video preview ----
 function drawVideoFrameOnce() {
   if (!state.videoEl) return;
-  drawComposite($('composeCanvas'), state.videoEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+  drawComposite($('composeCanvas'), state.videoEl, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0, coverDesign());
   updateVidScrub();
 }
 function coverVideoLoop() {
   const v = state.videoEl;
   if (!v) return;
   if (v.currentTime >= state.trimEnd) { v.currentTime = state.trimStart; }
-  drawComposite($('composeCanvas'), v, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+  drawComposite($('composeCanvas'), v, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0, coverDesign());
   updateVidScrub();
   if (!v.paused && !state.exporting) state.videoRAF = requestAnimationFrame(coverVideoLoop);
 }
@@ -1964,9 +2089,14 @@ async function exportVideo() {
   $('vidPlayBtn').textContent = '▶ Play';
 
   const mime = pickExportMime();
-  const stream = canvas.captureStream(30);
   const prevMuted = v.muted;
-  v.muted = false; // ensure audio track is captured (audio will play during export)
+  v.muted = false; // capture audio (plays aloud during export)
+  // Frame-accurate capture locks the video track to the video element's own clock — the same clock
+  // the audio plays on — so they stay in sync instead of drifting.
+  const useRVFC = typeof v.requestVideoFrameCallback === 'function';
+  const stream = canvas.captureStream(useRVFC ? 0 : 30);
+  const canvasTrack = stream.getVideoTracks()[0];
+  const canRequestFrame = useRVFC && canvasTrack && typeof canvasTrack.requestFrame === 'function';
   try {
     const vs = v.captureStream ? v.captureStream() : (v.mozCaptureStream ? v.mozCaptureStream() : null);
     if (vs) { const at = vs.getAudioTracks()[0]; if (at) stream.addTrack(at); }
@@ -2007,17 +2137,35 @@ async function exportVideo() {
   await v.play().catch(() => {});
 
   const span = (state.trimEnd - state.trimStart) || 1;
-  const loop = () => {
-    if (!state.exporting) return;
-    drawComposite(canvas, v, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0);
+  const updateProgress = () => {
     const done = v.currentTime - state.trimStart;
     const pct = Math.max(0, Math.min(100, (done / span) * 100));
     $('exportProgressBar').style.width = pct.toFixed(1) + '%';
     $('exportProgressText').textContent = 'Recording… ' + fmtTime(done) + ' / ' + fmtTime(span);
-    if (v.currentTime >= state.trimEnd || v.ended) { stopExport(); return; }
-    state.videoRAF = requestAnimationFrame(loop);
   };
-  state.videoRAF = requestAnimationFrame(loop);
+
+  if (canRequestFrame) {
+    // Synced path: draw + push a frame each time the video actually presents one
+    const onFrame = () => {
+      if (!state.exporting) return;
+      drawComposite(canvas, v, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0, coverDesign());
+      try { canvasTrack.requestFrame(); } catch (_) {}
+      updateProgress();
+      if (v.currentTime >= state.trimEnd || v.ended) { stopExport(); return; }
+      v.requestVideoFrameCallback(onFrame);
+    };
+    v.requestVideoFrameCallback(onFrame);
+  } else {
+    // Fallback: rAF loop (may drift slightly on browsers without requestVideoFrameCallback)
+    const loop = () => {
+      if (!state.exporting) return;
+      drawComposite(canvas, v, coverHookText(), null, state.coverOffsetX || 0, state.coverOffsetY || 0, coverDesign());
+      updateProgress();
+      if (v.currentTime >= state.trimEnd || v.ended) { stopExport(); return; }
+      state.videoRAF = requestAnimationFrame(loop);
+    };
+    state.videoRAF = requestAnimationFrame(loop);
+  }
 }
 
 function loadVideoUpload(e) {
@@ -2143,13 +2291,25 @@ function saveAndNew() {
   state.editableHooks = null;
   state.uploadedImageDataUrl = null;
   state.selectedHookIdx = 1;
-  state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverNote = '';
+  state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverNote = ''; state.coverCleared = false;
   // reset video mode
   stopExport();
   stopCoverVideoLoop();
   state.videoEl = null; state.trimStart = 0; state.trimEnd = 0; state.trimDur = 0;
   if (state.videoObjectUrl) { try { URL.revokeObjectURL(state.videoObjectUrl); } catch (_) {} state.videoObjectUrl = null; }
   if ($('trimVideo')) { $('trimVideo').removeAttribute('src'); $('trimVideo').load && $('trimVideo').load(); }
+  // reset design fresh for the next post
+  state.coverLayout = 'A';
+  state.colors = { primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a' };
+  state.watermark = { text: '', logoImg: null, pos: 'br', opacity: 75, size: 28 };
+  if ($('coverNote')) $('coverNote').value = '';
+  if ($('colPrimary')) { $('colPrimary').value = '#0d52b0'; $('colAccent').value = '#4ec6e2'; $('colText').value = '#0a0a0a'; }
+  if ($('wmText')) $('wmText').value = '';
+  if ($('wmOpacity')) $('wmOpacity').value = 75;
+  if ($('wmSize')) $('wmSize').value = 28;
+  if ($('wmLogo')) $('wmLogo').value = '';
+  document.querySelectorAll('#layoutPicker .lay').forEach(x => x.classList.toggle('active', x.dataset.layout === 'A'));
+  document.querySelectorAll('#wmPosPicker .wmpos').forEach(x => x.classList.toggle('active', x.dataset.pos === 'br'));
   switchCoverMode('image');
   $('urlInput').value = '';
   $('manualTitle').value = '';
@@ -2189,9 +2349,10 @@ $('ytAutoBtn').addEventListener('click', tryYoutubeAutoFetch);
 $('fetchBtn').addEventListener('click', handleFetch);
 $('copyPromptBtn').addEventListener('click', copyPrompt);
 $('parseBtn').addEventListener('click', parseResponse);
-$('imageReplaceBtn').addEventListener('click', () => $('imageUpload').click());
-$('imageUpload').addEventListener('change', handleImageUpload);
+$('imageReplaceBtn').addEventListener('click', () => $('imageUpload').click());$('imageUpload').addEventListener('change', handleImageUpload);
 $('downloadBtn').addEventListener('click', downloadImage);
+$('clearCoverBtn').addEventListener('click', clearCover);
+$('clearCoverBtnVid').addEventListener('click', clearCover);
 
 // --- Video mode wiring ---
 $('modeImageBtn').addEventListener('click', () => switchCoverMode('image'));
@@ -2252,6 +2413,41 @@ $('imageScale').addEventListener('input', () => {
 $('coverNote').addEventListener('input', () => {
   state.coverNote = $('coverNote').value;
   redrawCover();
+});
+
+// --- Design controls (layout / colours / watermark) ---
+$('layoutPicker').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-layout]'); if (!b) return;
+  state.coverLayout = b.dataset.layout;
+  document.querySelectorAll('#layoutPicker .lay').forEach(x => x.classList.toggle('active', x === b));
+  clampCoverOffset();
+  redrawCover();
+});
+$('colPrimary').addEventListener('input', () => { state.colors.primary = $('colPrimary').value; redrawCover(); });
+$('colAccent').addEventListener('input', () => { state.colors.accent = $('colAccent').value; redrawCover(); });
+$('colText').addEventListener('input', () => { state.colors.text = $('colText').value; redrawCover(); });
+$('colorPresets').addEventListener('click', (e) => {
+  const c = e.target.closest('.cp'); if (!c) return;
+  const [p, a, t] = c.dataset.p.split(',');
+  state.colors = { primary: p, accent: a, text: t };
+  $('colPrimary').value = p; $('colAccent').value = a; $('colText').value = t;
+  redrawCover();
+});
+$('wmText').addEventListener('input', () => { state.watermark.text = $('wmText').value; state.watermark.logoImg = null; redrawCover(); });
+$('wmPosPicker').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-pos]'); if (!b) return;
+  state.watermark.pos = b.dataset.pos;
+  document.querySelectorAll('#wmPosPicker .wmpos').forEach(x => x.classList.toggle('active', x === b));
+  redrawCover();
+});
+$('wmOpacity').addEventListener('input', () => { state.watermark.opacity = +$('wmOpacity').value; redrawCover(); });
+$('wmSize').addEventListener('input', () => { state.watermark.size = +$('wmSize').value; redrawCover(); });
+$('wmLogo').addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = (ev) => { const im = new Image(); im.onload = () => { state.watermark.logoImg = im; redrawCover(); }; im.src = ev.target.result; };
+  r.readAsDataURL(f);
 });
 
 // Re-center button
