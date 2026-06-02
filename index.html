@@ -758,8 +758,54 @@
       </div>
     </div>
 
+    <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
+      <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
+      <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.7</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>New <strong>YouTube transcript</strong> source: paste a transcript and it auto-strips timestamps and [Music] tags. Includes a best-effort auto-fetch button.</li>
+          <li>Fixed the Manual paste <em>"title is not defined"</em> error.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.6</strong></p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>Empty picture area now exports as a <strong>transparent window</strong> (for dropping video behind the frame in an editor). Checkerboard shows it in the preview.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.5</strong></p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>On mobile, the cover image now sits right below the hooks (not at the bottom).</li>
+          <li>Mobile polish: bigger tap targets, wrapping controls.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.4</strong></p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>Image <strong>note / disclaimer chip</strong> on the cover.</li>
+          <li><strong>Drag-to-pan</strong> the image after zoom, plus a Center button.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.3</strong></p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Output language</strong> selector (default Bahasa Indonesia; translates international news).</li>
+          <li><strong>Editable hooks</strong> — edit the text and the cover updates live.</li>
+          <li>Copy button for hashtags.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.2</strong></p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>Corrected cover template (picture top / white box straddling / blue bottom).</li>
+          <li>Fixed cover upload; cover &amp; carousel slide-1 images are now independent.</li>
+          <li>Headline optional in Manual paste.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.1</strong></p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>8 hooks total (added Casual/Daily and Casual/Slang).</li>
+          <li>Per-hook copy buttons and a summary copy button.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.0</strong></p>
+        <ul style="margin: 0 0 4px; padding-left: 20px;">
+          <li>URL auto-extract + manual paste, prompt generator, summary, image prompt, hashtags, cover image, 5-slide carousel builder, reel script, and saved-post history.</li>
+        </ul>
+      </div>
+    </details>
+
     <div class="footer-note">
-      Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.7 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -945,6 +991,9 @@ async function handleFetch() {
         url: ytUrl.startsWith('http') ? ytUrl : 'youtube',
       };
     } else {
+      let title = $('manualTitle').value.trim();
+      const body = $('manualBody').value.trim();
+      if (!body || body.length < 100) throw new Error('Article body must be at least 100 characters.');
       if (!title) {
         // Headline optional: derive a short one from the first sentence of the body
         title = body.split(/[.!?\n]/)[0].trim().split(/\s+/).slice(0, 12).join(' ');
