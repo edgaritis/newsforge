@@ -412,7 +412,14 @@
   }
 
   .canvas-wrap {
-    background: #1A1A1A;
+    background-color: #e9e9e9;
+    background-image:
+      linear-gradient(45deg, #c4c4c4 25%, transparent 25%),
+      linear-gradient(-45deg, #c4c4c4 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #c4c4c4 75%),
+      linear-gradient(-45deg, transparent 75%, #c4c4c4 75%);
+    background-size: 24px 24px;
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0;
     padding: 16px;
     border: 2px solid #0A0A0A;
     max-width: 100%;
@@ -518,6 +525,7 @@
       <div class="tabs">
         <button class="tab active" data-tab="url">URL (auto-extract)</button>
         <button class="tab" data-tab="manual">Manual paste</button>
+        <button class="tab" data-tab="youtube">YouTube transcript</button>
       </div>
       <div class="tab-content">
         <div id="urlMode">
@@ -536,6 +544,27 @@
           <div class="field">
             <label class="input-label">Source name (optional, e.g. kompas.com)</label>
             <input class="input" id="manualSource" type="text" placeholder="kompas.com">
+          </div>
+        </div>
+        <div id="youtubeMode" class="hidden">
+          <div class="note" style="margin-bottom: 16px;">
+            <strong>How to get the transcript:</strong> open the video on YouTube → click <strong>“…more”</strong> under the title (or the “⋯” menu) → <strong>Show transcript</strong> → select all of it and copy → paste below. The app removes the timestamps automatically. (“Try auto-fetch” is best-effort and often won’t work — pasting always does.)
+          </div>
+          <div class="field">
+            <label class="input-label">YouTube URL (optional — used as the source link)</label>
+            <input class="input" id="ytUrl" type="text" placeholder="https://www.youtube.com/watch?v=...">
+          </div>
+          <div class="field">
+            <label class="input-label">Video title (optional — used as headline)</label>
+            <input class="input" id="ytTitle" type="text" placeholder="The video title (optional)">
+          </div>
+          <div class="controls-row" style="margin-bottom: 12px;">
+            <button class="btn-secondary" id="ytAutoBtn" type="button">⟳ Try auto-fetch transcript</button>
+            <span id="ytStatus"></span>
+          </div>
+          <div class="field">
+            <label class="input-label">Transcript (paste from YouTube “Show transcript”)</label>
+            <textarea class="input" id="ytTranscript" placeholder="Paste the copied transcript here. Timestamps like 0:15 and tags like [Music] are removed automatically."></textarea>
           </div>
         </div>
       </div>
@@ -791,6 +820,49 @@ function switchTab(mode) {
   });
   $('urlMode').classList.toggle('hidden', mode !== 'url');
   $('manualMode').classList.toggle('hidden', mode !== 'manual');
+  $('youtubeMode').classList.toggle('hidden', mode !== 'youtube');
+}
+
+// Strip YouTube transcript noise: timestamps, [Music]/[Applause] tags, blank lines
+function cleanTranscript(raw) {
+  return (raw || '')
+    .replace(/\[[^\]]*\]/g, ' ')                                   // [Music], [Applause], [__]
+    .replace(/\((?:music|applause|laughter|inaudible)\)/gi, ' ')   // (music) etc
+    .replace(/(^|\s)\d{1,2}:\d{2}(?::\d{2})?(?=\s|$)/g, ' ')        // 0:15, 1:02, 1:23:45
+    .replace(/\s*\n+\s*/g, ' ')                                     // join lines
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+// Best-effort transcript auto-fetch via Jina (often fails for YouTube — paste is the reliable path)
+async function tryYoutubeAutoFetch() {
+  const url = $('ytUrl').value.trim();
+  if (!url.startsWith('http')) { showToast('Enter the YouTube URL first'); return; }
+  const btn = $('ytAutoBtn');
+  btn.disabled = true;
+  clearMsg($('errorContainer'));
+  setStatus($('ytStatus'), 'Trying (best effort)…');
+  try {
+    const res = await fetch('https://r.jina.ai/' + url, { headers: { 'Accept': 'text/plain' } });
+    if (!res.ok) throw new Error('status ' + res.status);
+    const text = await res.text();
+    const tm = text.match(/Title:\s*(.+)/);
+    if (tm && !$('ytTitle').value.trim()) $('ytTitle').value = tm[1].trim().replace(/\s*-\s*YouTube$/, '');
+    const idx = text.indexOf('Markdown Content:');
+    const body = cleanTranscript(idx !== -1 ? text.slice(idx + 'Markdown Content:'.length) : text);
+    if (body.length < 200) {
+      setStatus($('ytStatus'), '');
+      showError($('errorContainer'), 'Auto-fetch couldn’t get a usable transcript (normal for YouTube). Use “Show transcript” on the video, copy it, and paste below.');
+    } else {
+      $('ytTranscript').value = body.slice(0, 12000);
+      setStatus($('ytStatus'), 'Got text — review it below, then click Fetch article.');
+    }
+  } catch (e) {
+    setStatus($('ytStatus'), '');
+    showError($('errorContainer'), 'Auto-fetch failed (' + e.message + '). Paste the transcript manually — that always works.');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ============================================================
@@ -854,10 +926,25 @@ async function handleFetch() {
       if (!url.startsWith('http')) throw new Error('Enter a valid URL (must start with http:// or https://)');
       setStatus($('statusContainer'), 'Extracting article via Jina Reader...');
       article = await fetchArticleFromJina(url);
+    } else if (state.inputMode === 'youtube') {
+      let title = $('ytTitle').value.trim();
+      const ytUrl = $('ytUrl').value.trim();
+      const body = cleanTranscript($('ytTranscript').value);
+      if (!body || body.length < 100) {
+        throw new Error('Paste the video transcript (at least 100 characters). On YouTube use “…more” → Show transcript, copy it, and paste it in the box.');
+      }
+      if (!title) {
+        title = body.split(/[.!?\n]/)[0].trim().split(/\s+/).slice(0, 12).join(' ');
+        if (title.length > 90) title = title.slice(0, 90) + '…';
+      }
+      article = {
+        title,
+        content: body.slice(0, 8000),
+        heroImage: null,
+        source: 'YouTube',
+        url: ytUrl.startsWith('http') ? ytUrl : 'youtube',
+      };
     } else {
-      let title = $('manualTitle').value.trim();
-      const body = $('manualBody').value.trim();
-      if (!body || body.length < 100) throw new Error('Article body must be at least 100 characters.');
       if (!title) {
         // Headline optional: derive a short one from the first sentence of the body
         title = body.split(/[.!?\n]/)[0].trim().split(/\s+/).slice(0, 12).join(' ');
@@ -1241,7 +1328,7 @@ function renderComposite() {
 
   if (!imageSource) {
     drawComposite(canvas, null, hookText, null, 0, 0);
-    $('canvasWarning').innerHTML = '<div class="error" style="margin-top: 12px;">No image yet — upload one below.</div>';
+    $('canvasWarning').innerHTML = '<div class="note" style="margin-top: 10px;">Picture area is transparent (checkerboard = see-through). Download as PNG and drop your footage behind it in your video editor — or upload an image below to bake one in.</div>';
     return;
   }
 
@@ -1340,8 +1427,16 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY) {
 
   const splitY = Math.round(H * 0.756); // picture(top) / blue(bottom) boundary
 
-  // ---- Blue fills the whole canvas (bottom zone shows through) ----
+  // ---- Transparent base so the empty picture area exports as a transparent window ----
+  ctx.clearRect(0, 0, W, H);
+
+  // ---- Blue ONLY in the bottom zone (top picture zone stays transparent when no image) ----
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, splitY, W, H - splitY);
+  ctx.clip();
   drawBlueBackground(ctx, W, H);
+  ctx.restore();
 
   // ---- Picture: full-bleed top zone (0,0 → W, splitY), cover-fit + zoom + pan ----
   if (img) {
@@ -1370,15 +1465,8 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY) {
     ctx.clip();
     ctx.drawImage(img, dX, dY, dW, dH);
     ctx.restore();
-  } else {
-    ctx.fillStyle = '#fb5058'; // red placeholder = "picture goes here"
-    ctx.fillRect(0, 0, W, splitY);
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.font = '700 40px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('picture goes here', W / 2, splitY * 0.5);
   }
+  // else: leave the picture zone fully TRANSPARENT (no fill, no text) so it exports clean
 
   // ---- Optional note / disclaimer (small chip, top-left of picture) ----
   const note = (state.coverNote || '').trim();
@@ -1620,6 +1708,10 @@ function saveAndNew() {
   $('manualTitle').value = '';
   $('manualBody').value = '';
   $('manualSource').value = '';
+  if ($('ytUrl')) $('ytUrl').value = '';
+  if ($('ytTitle')) $('ytTitle').value = '';
+  if ($('ytTranscript')) $('ytTranscript').value = '';
+  if ($('ytStatus')) $('ytStatus').textContent = '';
   $('responseInput').value = '';
   if ($('coverNote')) $('coverNote').value = '';
   $('imageScale').value = 1;
@@ -1646,6 +1738,7 @@ function clearAllHistory() {
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => switchTab(t.dataset.tab));
 });
+$('ytAutoBtn').addEventListener('click', tryYoutubeAutoFetch);
 $('fetchBtn').addEventListener('click', handleFetch);
 $('copyPromptBtn').addEventListener('click', copyPrompt);
 $('parseBtn').addEventListener('click', parseResponse);
