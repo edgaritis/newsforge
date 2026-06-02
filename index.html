@@ -300,6 +300,27 @@
   }
   @media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 40px; } }
 
+  /* Step 4 results layout */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    column-gap: 48px;
+    align-items: start;
+  }
+  .results-grid > .col-top  { grid-column: 1; grid-row: 1; }
+  .results-grid > .col-rest { grid-column: 1; grid-row: 2; }
+  .results-grid > .cover-col {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    position: sticky;
+    top: 20px;
+  }
+  @media (max-width: 900px) {
+    /* stack in DOM order: hooks-area → cover → rest */
+    .results-grid { display: block; }
+    .results-grid > .cover-col { position: static; margin: 28px 0; }
+  }
+
   .section-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -606,15 +627,46 @@
         <span class="step-title">Pick hook, image, post</span>
       </div>
 
-      <div class="grid">
-        <!-- LEFT: Text -->
-        <div>
+      <div class="results-grid">
+        <div class="col-top">
           <div class="section-label">Source headline</div>
           <div class="article-preview" id="sourceHeadlineBox" style="margin-bottom: 24px;"></div>
 
           <div class="section-label">Pick a hook (for the image)</div>
           <div id="hooksList"></div>
+        </div>
 
+        <!-- COVER: right column on desktop; sits between hooks and summary on mobile -->
+        <div class="cover-col">
+          <div class="section-label">Cover image</div>
+          <div class="canvas-wrap">
+            <canvas id="composeCanvas"></canvas>
+          </div>
+          <div id="canvasWarning"></div>
+          <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">
+            Tip: after zooming, drag the image to reposition it
+          </div>
+          <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <label style="font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #555; white-space: nowrap;">Zoom</label>
+            <input type="range" id="imageScale" min="1" max="2" step="0.05" value="1" style="flex: 1; cursor: pointer; accent-color: #D72638;">
+            <span id="imageScaleValue" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #0A0A0A; min-width: 36px;">1.0×</span>
+            <button class="btn-tiny" id="recenterBtn" title="Re-center image" style="flex-shrink:0;">⊙ Center</button>
+          </div>
+          <div class="field" style="margin-top: 14px;">
+            <label class="input-label">Image note / disclaimer (optional — leave blank to remove)</label>
+            <input class="input" id="coverNote" type="text" placeholder="e.g. Image is illustration only, not the actual event" style="font-size: 14px;">
+          </div>
+          <input type="file" id="imageUpload" accept="image/*" class="hidden">
+          <div class="controls-row">
+            <button class="btn-secondary" id="imageReplaceBtn">↑ Upload / Replace image</button>
+            <button class="btn" id="downloadBtn">↓ Download PNG</button>
+          </div>
+          <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.1em; text-transform: uppercase;">
+            1080 × 1440 · 3:4 portrait
+          </div>
+        </div>
+
+        <div class="col-rest">
           <div class="section-label" style="margin-top: 32px;">Summary (for the caption)</div>
           <div class="summary-box" id="summaryBox"></div>
           <div class="controls-row" style="margin-top: 10px;">
@@ -657,36 +709,6 @@
           <div class="controls-row" style="margin-top: 24px;">
             <button class="btn" id="copyCaptionBtn">📋 Copy Caption</button>
             <button class="btn-secondary" id="saveNewBtn">✓ Save &amp; New</button>
-          </div>
-        </div>
-
-        <!-- RIGHT: Image -->
-        <div>
-          <div class="section-label">Cover image</div>
-          <div class="canvas-wrap">
-            <canvas id="composeCanvas"></canvas>
-          </div>
-          <div id="canvasWarning"></div>
-          <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">
-            Tip: after zooming, drag the image to reposition it
-          </div>
-          <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <label style="font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #555; white-space: nowrap;">Zoom</label>
-            <input type="range" id="imageScale" min="1" max="2" step="0.05" value="1" style="flex: 1; cursor: pointer; accent-color: #D72638;">
-            <span id="imageScaleValue" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #0A0A0A; min-width: 36px;">1.0×</span>
-            <button class="btn-tiny" id="recenterBtn" title="Re-center image" style="flex-shrink:0;">⊙ Center</button>
-          </div>
-          <div class="field" style="margin-top: 14px;">
-            <label class="input-label">Image note / disclaimer (optional — leave blank to remove)</label>
-            <input class="input" id="coverNote" type="text" placeholder="e.g. Image is illustration only, not the actual event" style="font-size: 14px;">
-          </div>
-          <input type="file" id="imageUpload" accept="image/*" class="hidden">
-          <div class="controls-row">
-            <button class="btn-secondary" id="imageReplaceBtn">↑ Upload / Replace image</button>
-            <button class="btn" id="downloadBtn">↓ Download PNG</button>
-          </div>
-          <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.1em; text-transform: uppercase;">
-            1080 × 1440 · 3:4 portrait
           </div>
         </div>
       </div>
