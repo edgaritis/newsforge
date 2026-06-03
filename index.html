@@ -551,6 +551,12 @@
   }
   .step4-nav button:hover { background: #0A0A0A; color: #fff; }
   #jumpHooks, #jumpCover, #jumpCaption, #jumpCarousel { scroll-margin-top: 64px; }
+  .step4-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 4px 0 14px; }
+  .step4-tools .proj-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #888; margin-left: 4px; }
+  .proj-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #E5DFD2; }
+  .proj-row .proj-meta { flex: 1; min-width: 0; }
+  .proj-row .proj-title { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .proj-row .proj-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #999; }
 </style>
 </head>
 <body>
@@ -640,6 +646,13 @@
         </select>
       </div>
 
+      <div class="field" style="margin-top: 16px;">
+        <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-size:14px; line-height:1.4;">
+          <input type="checkbox" id="wantRephrase" style="margin-top:3px; width:18px; height:18px; accent-color:#D72638;">
+          <span>Also generate a <strong>full rephrase</strong> of the article (a complete rewrite in your own words, ~same length — to post without copying the original). Optional.</span>
+        </label>
+      </div>
+
       <div class="controls-row">
         <button class="btn" id="fetchBtn">Fetch article</button>
         <span id="statusContainer"></span>
@@ -706,6 +719,14 @@
       <div>
         <span class="step-number">4</span>
         <span class="step-title">Pick hook, image, post</span>
+      </div>
+
+      <div class="step4-tools" id="step4Tools">
+        <button type="button" class="btn-tiny" id="saveProjectBtn">💾 Save</button>
+        <button type="button" class="btn-tiny" id="newProjectBtn">＋ New</button>
+        <button type="button" class="btn-tiny" id="projectsBtn">🗂 Projects</button>
+        <button type="button" class="btn-tiny" id="downloadProjectBtn">⬇ Download</button>
+        <span id="projectNameTag" class="proj-name"></span>
       </div>
 
       <div class="step4-nav" id="step4Nav">
@@ -849,6 +870,15 @@
             <button class="btn-tiny" id="copySummaryBtn">📋 Copy Summary</button>
           </div>
 
+          <div id="rephraseSection" class="hidden">
+            <div class="section-label" style="margin-top: 32px;">Rephrased post <span id="rephraseCount" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#888; letter-spacing:0.08em;"></span></div>
+            <div class="note" style="margin: 0 0 8px;">A full rewrite in your own words — post this instead of copying the original.</div>
+            <div id="rephraseBox" style="background:#FFF; border:1.5px solid #D5CFC1; padding:14px 16px; max-height:320px; overflow:auto; font-family:'Fraunces',serif; font-size:15px; line-height:1.65; white-space:pre-wrap;"></div>
+            <div class="controls-row" style="margin-top: 10px;">
+              <button class="btn-tiny" id="copyRephraseBtn">📋 Copy Rephrased Post</button>
+            </div>
+          </div>
+
           <div class="section-label" style="margin-top: 32px;">Discussion question (drives comments)</div>
           <div class="summary-box" id="discussionBox" style="font-style: italic;"></div>
 
@@ -884,7 +914,6 @@
 
           <div class="controls-row" style="margin-top: 24px;">
             <button class="btn" id="copyCaptionBtn">📋 Copy Caption</button>
-            <button class="btn-secondary" id="saveNewBtn">✓ Save &amp; New</button>
           </div>
         </div>
       </div>
@@ -908,6 +937,11 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.14</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Projects.</strong> Each processed article is now a "project". New toolbar at the top of Step 4: <strong>Save</strong> (to a named library on this browser), <strong>New</strong>, <strong>Projects</strong> (reopen saved ones), and <strong>Download</strong> (a self-contained HTML backup you can read anywhere). A silent autosave offers to restore your last project after a crash. Saved projects keep text + cover settings; photos/videos are re-added on reopen.</li>
+          <li><strong>Optional Rephrase.</strong> Tick "Also generate a full rephrase" before copying the prompt to get a complete reworded version of the article (your own words, ~same length) — shown as its own copyable section. Off by default.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.13</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li>Fixed video export running longer than the trimmed clip — it now waits for the trim-in point before recording, with a safety timer so a clip can't overrun its length.</li>
@@ -977,7 +1011,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.13 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.14 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -1000,6 +1034,23 @@
     </div>
   </div>
 
+  <div id="projectsModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-title">Projects</div>
+      <div class="note" style="margin-bottom:14px;">Saved on this browser only. Text + cover settings are kept; photos/videos are re-added when you reopen. Use Download for a permanent backup.</div>
+      <div id="projectsList" style="max-height:50vh; overflow:auto;"></div>
+      <div class="controls-row" style="margin-top:16px;">
+        <button class="btn-secondary" id="projectsCloseBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="restoreBanner" class="hidden" style="position:fixed; left:0; right:0; bottom:0; z-index:60; background:#0A0A0A; color:#fff; padding:14px 18px; display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; font-size:14px;">
+    <span>Found an unsaved project from last time.</span>
+    <button class="btn-tiny" id="restoreYesBtn" type="button" style="background:#fff; color:#0A0A0A;">Restore it</button>
+    <button class="btn-tiny" id="restoreNoBtn" type="button" style="background:transparent; color:#fff; border-color:#fff;">Discard</button>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
 
 <script>
@@ -1015,6 +1066,8 @@ const state = {
   coverLayout: 'A',
   colors: { primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a' },
   watermark: { text: '', logoImg: null, pos: 'br', opacity: 75, size: 28 },
+  projectId: null,
+  projectName: '',
 };
 
 const HOOK_LABELS = [
@@ -1235,6 +1288,16 @@ function buildPrompt(article) {
   };
   const langRule = LANG_INSTRUCTION[langSel] || LANG_INSTRUCTION.id;
 
+  const wantRephrase = !!($('wantRephrase') && $('wantRephrase').checked);
+  const rephraseField = wantRephrase
+    ? `,
+  "rephrased_post": "A COMPLETE REWRITE of the article in your own words, roughly the SAME LENGTH as the source, suitable to publish as the post body. CRITICAL: this must NOT resemble the original wording — use a different opening, different sentence structure and ordering, and your own phrasing throughout. Do NOT copy distinctive phrases or sentences from the source. Keep every FACT accurate (names, numbers, dates, quotes verbatim) but tell it in a fresh voice. Follow the LANGUAGE instruction above."`
+    : '';
+  const rephraseRule = wantRephrase
+    ? `
+- rephrased_post must be a genuine rewrite, NOT a light paraphrase: if a sentence could be found by searching the source text, reword it further. Different structure, same facts.`
+    : '';
+
   return `You are repackaging a news article into a Facebook post for a PERSONAL BLOG that seeks audience attention and engagement — NOT a neutral news wire. The hooks should grab attention and earn clicks and shares.
 
 LANGUAGE: ${langRule} (The image_prompt is the ONLY field that must always be in English, since image tools work best in English.)
@@ -1268,14 +1331,14 @@ Output ONLY a JSON object with EXACTLY this structure. No preamble, no markdown 
   ],
   "reel_script": "A 15-second voiceover narration script (3-4 short punchy sentences) summarizing the story for a short video. Hook the viewer in the first sentence.",
   "image_prompt": "A single vivid image-generation prompt (for tools like Nano Banana or Midjourney) depicting a scene that matches this article's topic and mood. Describe subject, setting, expression, lighting, and composition in one paragraph. Do NOT depict real named public figures. Style: ${styleHint}.",
-  "hashtags": ["array", "of", "5to8", "relevant", "topical", "hashtags", "no", "hashsymbol"]
+  "hashtags": ["array", "of", "5to8", "relevant", "topical", "hashtags", "no", "hashsymbol"]${rephraseField}
 }
 
 Rules:
 - Hooks go on top of an image — keep them SHORT and high-impact.
 - All seven hooks must be DISTINCT in tone, not rewordings of each other.
 - Hashtags must be single words or compound (no spaces), no # symbol in the strings.
-- Follow the LANGUAGE instruction above for every field except image_prompt (always English).
+- Follow the LANGUAGE instruction above for every field except image_prompt (always English).${rephraseRule}
 - Output ONLY the JSON object. Nothing before or after.`;
 }
 
@@ -1356,7 +1419,10 @@ function parseResponse() {
   state.selectedHookIdx = 1;
   state.editableHooks = [state.article.title, ...parsed.hooks];
   state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverCleared = false;
+  state.projectId = null; state.projectName = '';
   renderStep4();
+  updateProjectNameTag();
+  writeDraft();
   // jump straight to the results so there's no long scroll past the paste box
   requestAnimationFrame(() => {
     const nav = $('step4Nav') || $('step4');
@@ -1424,6 +1490,16 @@ function renderStep4() {
   });
 
   $('summaryBox').textContent = state.generated.summary;
+  // Optional rephrased post
+  const rp = state.generated.rephrased_post;
+  if (rp && String(rp).trim()) {
+    $('rephraseBox').textContent = String(rp).trim();
+    $('rephraseCount').textContent = '· ' + String(rp).trim().length + ' chars';
+    $('rephraseSection').classList.remove('hidden');
+  } else {
+    $('rephraseSection').classList.add('hidden');
+  }
+  updateProjectNameTag();
   $('discussionBox').textContent = state.generated.discussion_question || '(No discussion question returned.)';
   $('hashtagsBox').innerHTML = state.generated.hashtags
     .map(h => `<span class="hashtag">#${escapeHtml(String(h).replace(/^#/, ''))}</span>`)
@@ -1565,6 +1641,7 @@ function redrawCover() {
   } else {
     drawComposite(canvas, null, coverHookText(), null, 0, 0, coverDesign());
   }
+  scheduleAutosave();
 }
 
 function renderComposite() {
@@ -2318,36 +2395,19 @@ function renderHistory() {
   });
 }
 
-function saveAndNew() {
-  if (!state.generated || !state.article) return;
-  const hook = (state.editableHooks && state.editableHooks[state.selectedHookIdx] != null)
-    ? state.editableHooks[state.selectedHookIdx]
-    : (state.selectedHookIdx === 0 ? state.article.title : state.generated.hooks[state.selectedHookIdx - 1]);
-  const record = {
-    time: new Date().toLocaleString(),
-    source: state.article.source || '',
-    hook: hook,
-    caption: buildCaption(),
-  };
-  const arr = loadHistory();
-  arr.unshift(record);
-  saveHistory(arr);
-  renderHistory();
-
-  // Reset the form
+// Reset the working form (does not save)
+function resetForm() {
   state.article = null;
   state.generated = null;
   state.editableHooks = null;
   state.uploadedImageDataUrl = null;
   state.selectedHookIdx = 1;
   state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverNote = ''; state.coverCleared = false;
-  // reset video mode
   stopExport();
   stopCoverVideoLoop();
   state.videoEl = null; state.trimStart = 0; state.trimEnd = 0; state.trimDur = 0;
   if (state.videoObjectUrl) { try { URL.revokeObjectURL(state.videoObjectUrl); } catch (_) {} state.videoObjectUrl = null; }
   if ($('trimVideo')) { $('trimVideo').removeAttribute('src'); $('trimVideo').load && $('trimVideo').load(); }
-  // reset design fresh for the next post
   state.coverLayout = 'A';
   state.colors = { primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a' };
   state.watermark = { text: '', logoImg: null, pos: 'br', opacity: 75, size: 28 };
@@ -2369,7 +2429,6 @@ function saveAndNew() {
   if ($('ytTranscript')) $('ytTranscript').value = '';
   if ($('ytStatus')) $('ytStatus').textContent = '';
   $('responseInput').value = '';
-  if ($('coverNote')) $('coverNote').value = '';
   $('imageScale').value = 1;
   $('imageScaleValue').textContent = '1.0×';
   $('step2').classList.add('hidden');
@@ -2377,8 +2436,200 @@ function saveAndNew() {
   $('step4').classList.add('hidden');
   clearMsg($('errorContainer'));
   clearMsg($('parseErrorContainer'));
+}
+
+// ============================================================
+// Projects library + draft autosave (localStorage, this device only)
+// ============================================================
+function loadProjects() { try { const r = localStorage.getItem('newsforge_projects'); return r ? JSON.parse(r) : []; } catch (e) { return []; } }
+function saveProjects(arr) { try { localStorage.setItem('newsforge_projects', JSON.stringify(arr)); return true; } catch (e) { showToast('Storage full — use Download to back up, then delete old projects'); return false; } }
+
+function currentProjectData() {
+  return {
+    inputMode: state.inputMode,
+    article: state.article,
+    generated: state.generated,
+    selectedHookIdx: state.selectedHookIdx,
+    editableHooks: state.editableHooks,
+    signature: ($('signatureInput') && $('signatureInput').value) || '',
+    coverNote: state.coverNote || '',
+    coverLayout: state.coverLayout,
+    colors: Object.assign({}, state.colors),
+    watermark: { text: state.watermark.text || '', pos: state.watermark.pos, opacity: state.watermark.opacity, size: state.watermark.size },
+    outputLang: ($('outputLang') && $('outputLang').value) || 'id'
+  };
+}
+
+function autoProjectName() {
+  const t = (state.article && state.article.title) ? state.article.title : 'Untitled';
+  const words = t.split(/\s+/).slice(0, 7).join(' ');
+  const d = new Date();
+  const stamp = (d.getMonth() + 1) + '/' + d.getDate();
+  return words.slice(0, 48) + ' · ' + stamp;
+}
+
+function updateProjectNameTag() {
+  const tag = $('projectNameTag');
+  if (tag) tag.textContent = state.projectName ? ('· ' + state.projectName) : '· unsaved';
+}
+
+function saveProject() {
+  if (!state.generated || !state.article) { showToast('Nothing to save yet'); return; }
+  const projs = loadProjects();
+  if (!state.projectId) { state.projectId = 'p' + Date.now(); state.projectName = autoProjectName(); }
+  const rec = { id: state.projectId, name: state.projectName, savedAt: Date.now(), data: currentProjectData() };
+  const idx = projs.findIndex(p => p.id === state.projectId);
+  if (idx >= 0) projs[idx] = rec; else projs.unshift(rec);
+  if (saveProjects(projs)) { updateProjectNameTag(); showToast('Saved: ' + state.projectName); }
+}
+
+function newProject() {
+  if (state.generated && !confirm('Start a new project? Anything not Saved will be cleared (the autosave net keeps your very last draft).')) return;
+  resetForm();
+  state.projectId = null;
+  state.projectName = '';
+  clearDraft();
+  updateProjectNameTag();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  showToast('Saved — form reset for next post');
+  showToast('New project');
+}
+
+function applyProjectData(data) {
+  state.inputMode = data.inputMode || 'url';
+  state.article = data.article || null;
+  state.generated = data.generated || null;
+  state.selectedHookIdx = data.selectedHookIdx != null ? data.selectedHookIdx : 1;
+  state.editableHooks = data.editableHooks || null;
+  state.coverNote = data.coverNote || '';
+  state.coverLayout = data.coverLayout || 'A';
+  state.colors = Object.assign({ primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a' }, data.colors || {});
+  state.watermark = Object.assign({ text: '', logoImg: null, pos: 'br', opacity: 75, size: 28 }, data.watermark || {});
+  state.uploadedImageDataUrl = null; state.coverImgEl = null; state.coverCleared = false;
+  state.videoEl = null;
+  // sync controls
+  if ($('outputLang') && data.outputLang) $('outputLang').value = data.outputLang;
+  if ($('signatureInput') && data.signature != null) $('signatureInput').value = data.signature;
+  if ($('coverNote')) $('coverNote').value = state.coverNote;
+  if ($('colPrimary')) { $('colPrimary').value = state.colors.primary; $('colAccent').value = state.colors.accent; $('colText').value = state.colors.text; }
+  if ($('wmText')) $('wmText').value = state.watermark.text;
+  if ($('wmOpacity')) $('wmOpacity').value = state.watermark.opacity;
+  if ($('wmSize')) $('wmSize').value = state.watermark.size;
+  document.querySelectorAll('#layoutPicker .lay').forEach(x => x.classList.toggle('active', x.dataset.layout === state.coverLayout));
+  document.querySelectorAll('#wmPosPicker .wmpos').forEach(x => x.classList.toggle('active', x.dataset.pos === state.watermark.pos));
+  switchCoverMode('image');
+  renderStep4();
+  $('step4').classList.remove('hidden');
+}
+
+function loadProject(id) {
+  const p = loadProjects().find(x => x.id === id);
+  if (!p) return;
+  applyProjectData(p.data);
+  state.projectId = p.id;
+  state.projectName = p.name;
+  updateProjectNameTag();
+  closeProjects();
+  requestAnimationFrame(() => { const n = $('step4Nav') || $('step4'); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  showToast('Opened: ' + p.name + ' — re-add your photo/video');
+}
+
+function renameProject(id) {
+  const projs = loadProjects();
+  const p = projs.find(x => x.id === id); if (!p) return;
+  const name = prompt('Rename project:', p.name);
+  if (name == null) return;
+  p.name = name.trim() || p.name;
+  saveProjects(projs);
+  if (state.projectId === id) { state.projectName = p.name; updateProjectNameTag(); }
+  renderProjectsList();
+}
+
+function deleteProject(id) {
+  const projs = loadProjects().filter(x => x.id !== id);
+  saveProjects(projs);
+  if (state.projectId === id) { state.projectId = null; state.projectName = ''; updateProjectNameTag(); }
+  renderProjectsList();
+}
+
+function renderProjectsList() {
+  const projs = loadProjects();
+  const box = $('projectsList');
+  if (!projs.length) { box.innerHTML = '<div class="note">No saved projects yet. Hit Save to add one.</div>'; return; }
+  box.innerHTML = '';
+  projs.forEach(p => {
+    const row = document.createElement('div'); row.className = 'proj-row';
+    const meta = document.createElement('div'); meta.className = 'proj-meta';
+    const title = document.createElement('div'); title.className = 'proj-title'; title.textContent = p.name;
+    const date = document.createElement('div'); date.className = 'proj-date'; date.textContent = new Date(p.savedAt).toLocaleString();
+    meta.appendChild(title); meta.appendChild(date);
+    const open = document.createElement('button'); open.className = 'btn-tiny'; open.textContent = 'Open'; open.onclick = () => loadProject(p.id);
+    const ren = document.createElement('button'); ren.className = 'btn-tiny'; ren.textContent = 'Rename'; ren.onclick = () => renameProject(p.id);
+    const del = document.createElement('button'); del.className = 'btn-tiny'; del.textContent = 'Delete'; del.onclick = () => { if (confirm('Delete "' + p.name + '"?')) deleteProject(p.id); };
+    row.appendChild(meta); row.appendChild(open); row.appendChild(ren); row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+
+function openProjects() { renderProjectsList(); $('projectsModal').classList.remove('hidden'); }
+function closeProjects() { $('projectsModal').classList.add('hidden'); }
+
+// Draft autosave (single rolling slot, crash net)
+let _autosaveTimer = null;
+function scheduleAutosave() { if (!state.generated) return; clearTimeout(_autosaveTimer); _autosaveTimer = setTimeout(writeDraft, 1200); }
+function writeDraft() {
+  try { localStorage.setItem('newsforge_draft', JSON.stringify({ projectId: state.projectId, projectName: state.projectName, data: currentProjectData(), ts: Date.now() })); } catch (e) {}
+}
+function clearDraft() { try { localStorage.removeItem('newsforge_draft'); } catch (e) {} }
+function maybeOfferRestore() {
+  let d = null;
+  try { const r = localStorage.getItem('newsforge_draft'); d = r ? JSON.parse(r) : null; } catch (e) {}
+  if (!d || !d.data || !d.data.generated) return;
+  state._pendingDraft = d;
+  $('restoreBanner').classList.remove('hidden');
+}
+
+// ============================================================
+// Download project as a readable single HTML file (backup)
+// ============================================================
+function downloadProject() {
+  if (!state.generated || !state.article) { showToast('Nothing to download yet'); return; }
+  const g = state.generated;
+  const name = state.projectName || autoProjectName();
+  const hook = (state.editableHooks && state.editableHooks[state.selectedHookIdx] != null)
+    ? state.editableHooks[state.selectedHookIdx]
+    : (state.selectedHookIdx === 0 ? state.article.title : g.hooks[state.selectedHookIdx - 1]);
+  let coverImg = '';
+  try { if (state.coverMode !== 'video') { coverImg = $('composeCanvas').toDataURL('image/png'); } } catch (e) {}
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const sec = (label, body) => body ? `<h2>${esc(label)}</h2><div class="b">${body}</div>` : '';
+  const list = (label, arr) => (arr && arr.length) ? `<h2>${esc(label)}</h2><ol>${arr.map(x => '<li>' + esc(x) + '</li>').join('')}</ol>` : '';
+  const html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(name)} — NewsForge project</title>
+<style>body{margin:0;background:#F2EEE3;color:#0A0A0A;font-family:Georgia,serif;padding:28px;line-height:1.6;}
+.wrap{max-width:760px;margin:0 auto;}h1{font-size:26px;margin:0 0 4px;}h2{font-family:Arial,sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#D72638;margin:26px 0 6px;}
+.meta{font-family:monospace;font-size:12px;color:#777;margin-bottom:18px;}.b{background:#fff;border:1.5px solid #D5CFC1;padding:12px 16px;white-space:pre-wrap;}
+ol{padding-left:22px;}li{margin:4px 0;}img{max-width:100%;border:1.5px solid #0A0A0A;margin-top:8px;}.tags span{display:inline-block;background:#fff;border:1px solid #ccc;padding:3px 8px;margin:3px;font-family:monospace;font-size:12px;}
+.foot{margin-top:30px;font-family:monospace;font-size:11px;color:#999;}</style></head><body><div class="wrap">
+<h1>${esc(name)}</h1>
+<div class="meta">${esc(state.article.source || '')} · saved ${esc(new Date().toLocaleString())} · NewsForge backup</div>
+${sec('Chosen hook', esc(hook))}
+${coverImg ? '<h2>Cover</h2><img src="' + coverImg + '" alt="cover">' : ''}
+${sec('Summary', esc(g.summary))}
+${g.rephrased_post ? sec('Rephrased post', esc(g.rephrased_post)) : ''}
+${sec('Discussion question', esc(g.discussion_question))}
+${(g.hashtags && g.hashtags.length) ? '<h2>Hashtags</h2><div class="tags">' + g.hashtags.map(h => '<span>#' + esc(h) + '</span>').join('') + '</div>' : ''}
+${list('All hooks', g.hooks)}
+${list('Carousel slides', g.carousel_slides)}
+${sec('Reel script', esc(g.reel_script))}
+${sec('Image prompt', esc(g.image_prompt))}
+<div class="foot">Read-only backup. To edit again, reopen NewsForge and rebuild from this text.</div>
+</div></body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.download = 'newsforge-' + name.replace(/[^\w\-]+/g, '_').slice(0, 40) + '.html';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  showToast('Project downloaded');
 }
 
 function clearAllHistory() {
@@ -2450,7 +2701,26 @@ $('copyHashtagsBtn').addEventListener('click', () => {
     );
   }
 });
-$('saveNewBtn').addEventListener('click', saveAndNew);
+$('copyRephraseBtn').addEventListener('click', () => {
+  const rp = state.generated && state.generated.rephrased_post;
+  if (rp) navigator.clipboard.writeText(String(rp).trim()).then(() => showToast('Rephrased post copied'), () => showToast('Copy failed'));
+});
+$('saveProjectBtn').addEventListener('click', saveProject);
+$('newProjectBtn').addEventListener('click', newProject);
+$('projectsBtn').addEventListener('click', openProjects);
+$('downloadProjectBtn').addEventListener('click', downloadProject);
+$('projectsCloseBtn').addEventListener('click', closeProjects);
+$('projectsModal').addEventListener('click', (e) => { if (e.target === $('projectsModal')) closeProjects(); });
+$('signatureInput').addEventListener('input', scheduleAutosave);
+// Rephrase toggle rebuilds the prompt if it's already on screen
+$('wantRephrase').addEventListener('change', () => { if (state.article && !$('step2').classList.contains('hidden')) $('promptOutput').value = buildPrompt(state.article); });
+// Restore-after-crash banner
+$('restoreYesBtn').addEventListener('click', () => {
+  const d = state._pendingDraft;
+  $('restoreBanner').classList.add('hidden');
+  if (d && d.data) { applyProjectData(d.data); state.projectId = d.projectId || null; state.projectName = d.projectName || ''; updateProjectNameTag(); requestAnimationFrame(() => { const n = $('step4Nav') || $('step4'); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); showToast('Restored — re-add your photo/video'); }
+});
+$('restoreNoBtn').addEventListener('click', () => { $('restoreBanner').classList.add('hidden'); clearDraft(); });
 $('clearHistoryBtn').addEventListener('click', clearAllHistory);
 $('imageScale').addEventListener('input', () => {
   $('imageScaleValue').textContent = parseFloat($('imageScale').value).toFixed(2) + '×';
@@ -2574,6 +2844,8 @@ $('recenterBtn').addEventListener('click', () => {
 })();
 
 renderHistory();
+updateProjectNameTag();
+maybeOfferRestore();
 </script>
 </body>
 </html>
