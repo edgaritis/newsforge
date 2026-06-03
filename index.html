@@ -580,6 +580,10 @@
       </div>
       <div class="step-desc">Paste a news URL (auto-extract), or paste the article text manually if the site is blocked.</div>
 
+      <div style="margin: 14px 0 4px;">
+        <button type="button" class="btn-tiny" id="openProjectsTop">🗂 My Projects</button>
+      </div>
+
       <div class="tabs">
         <button class="tab active" data-tab="url">URL (auto-extract)</button>
         <button class="tab" data-tab="manual">Manual paste</button>
@@ -937,6 +941,10 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.15</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li>Added a <strong>"My Projects" button on the landing page</strong> so saved projects can be reopened right after loading (previously the library was only reachable from inside a processed article).</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.14</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Projects.</strong> Each processed article is now a "project". New toolbar at the top of Step 4: <strong>Save</strong> (to a named library on this browser), <strong>New</strong>, <strong>Projects</strong> (reopen saved ones), and <strong>Download</strong> (a self-contained HTML backup you can read anywhere). A silent autosave offers to restore your last project after a crash. Saved projects keep text + cover settings; photos/videos are re-added on reopen.</li>
@@ -1011,7 +1019,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.14 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.15 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -2708,6 +2716,7 @@ $('copyRephraseBtn').addEventListener('click', () => {
 $('saveProjectBtn').addEventListener('click', saveProject);
 $('newProjectBtn').addEventListener('click', newProject);
 $('projectsBtn').addEventListener('click', openProjects);
+$('openProjectsTop').addEventListener('click', openProjects);
 $('downloadProjectBtn').addEventListener('click', downloadProject);
 $('projectsCloseBtn').addEventListener('click', closeProjects);
 $('projectsModal').addEventListener('click', (e) => { if (e.target === $('projectsModal')) closeProjects(); });
