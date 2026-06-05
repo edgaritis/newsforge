@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NewsForge — Manual mode (uses Claude.ai chat, no API key)</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#D72638">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NewsForge">
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAEQ0lEQVR4nO2Wy2/UVRTHz7m/9zyYRx9DSSNQEqzBYkP6sGgT6VTlURIqIalJ/QOIgCHiWiXRBQnKQk1qy4IN6Yqg1lh5JLSBEEhDkbYM6TQkbWqn0CmdB/P7ze91j4uqoTMVmkZcGL6rczfnc8/5nnNz8X4mC89T7LlmfwFYPYCIiOjJ4N8EIKLm8TDGCEBWFFXTmCCsGlMIQETbtmMjI67rioi/T03FY7FsOs0YI86JiDgHAM45/FXf37WuCEBEqiSePH78w87OMp/35rWrnx49CkSaxyPJsqKoiqYBgObxIDJJlmVFkWWZMaaoKizHEAvOjm2HwqHorl2nvvyi7+Kl5pZo7Lc7Pp/3uxMnJEna1th49fLl9zo77wwN1TY03BwcLI1EEDE5m1j30vrapibbshDxaQBEJKK5hw8PfnzsSn8/ce4PBHq++VaSxFBJuP+H86Xl5ZlU6trlS+UVFUwQ9MePZ6Ym397Xnpyd5a6LUKhlTBYRJUlaV1nZ/n5H96mvZUVOPpglToqq7dzX/vKWV385dy7atjd+d8wyzeZ3d27b/sbo0BDnHBkr7lEhgDFmmNa90dHrgwM76upKysrisXuNbzYDwPqqqnBZadXmzeN3x7a3tCwk5z0+70JybmZysnLjhtjwLSCCohKw4LFjjOXz+Yt9fYqqvNO2N5NK3Y/HG7Y3Xej7eWE+2fTWjkhFxUQsVl1TMz05qWpaIBQcGRqy8uYrtbW+QMB1nAIPCgEAgAB+v48DZNMZQVVlSTJSKX8gwARm5HTbthVNy+u6LMucyOVcU1UAsGzb4bzYg6UmEwFjYJriocPSzIw3HBKmp+ePfeK2Rhc4sZwOXg8C6I6LwaCBgJxYPp8VRWAo2DYSARYilgIQwXGckjBt3MDSqemuruDZswLn4e5upuuP97R5Bq6QonKfF11XSCTcSMRofH3N4ICQSGQ6P3ADAXQceEaLXJcHA6HTp/29vbloVI+2+n76UXzwkFQVuIu2LcXj+fp6z40b6f37A729Zs1WNHTu8zNDn+npYZkssCWDU7gHAEAAJAjc77c2bULL9Fy/nuj6nhRl7UdHjK2vGXX1pGloWXOHDnkHBrThW0Ztrbs2AvPzqBsF2ZcDIKLjyOPjAJA5cAAAgpWVgTNnSJKccFicTYjJuVxrqzY8HDp/num6WV0tpNPZ3bvJ5wdBANctaNFSIBGIopBKOyUl+S1b1NExZlpzn32Ots0M/dHhI1ZVlR1Za9Q3pDs61Nu3hYWFRwcP5pqbvb9eQNMEhsXP0TJjCojc6wUEphvgOCRJpKkAgKZFsgwILJMN9vTI8XF0nAcnv+Jr/AAALme5XPEULQcAANcFAGAMEIEIOP/zuBiIojwxIcwnjbp6kiRmmoQIiMUG/DPgWSJFIVFkug6cF9/6SS0zRSsR5vO4uJVPzb56ACz2ZAX6v35bXgD+S8AfULwAzA3yn08AAAAASUVORK5CYII=">
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAtF0lEQVR4nO2dd7wdVbn3n2etNWXPrqclJ70XUpAUQghNQJQiInjRCy/2gl7Qq17hKl4UFEHBBvra8JWiIFyKAqIGkCokBgnpveckJyc5bbdpq71/zD41Z4eAyA4yX87nc8I+s2dm7/nNeupag9sKRYiJGQpS6xOIOXKJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVWJxRFTlVgcMVVhNTmqklJr3ff/iKA1IFJKD/1GKeWhN3jFPcQcPjUQh9Y6nc0yBA2AAJFGEEABFApFRDzEezPZLEXQVf6qAcql8gDZxfwD4Bu89rnWmhns2cefaG9rI5Rq0ACIiErKbK7u9LPPFoJX1YfWzz35ZKlQqAwPiACAEO0AtAbDMI4/5RTbcbRSb9xH+tfljRaHUiqVSp11/MKXX3zx4L/e9sAD777ggu6uPGUDrYPWSIiS8j2nnLx1/fpEMqmkhEgViIQQZjCtdCqTuXfxY8NHjeZhcOgRKOZwqI3PEd3wAEAJtWwLESmlvu9/66qrFp18ipVISCkHXl3s/aW0QsRkKmWaJgAQQpRUQeALxWNz8vpSA7NiGOazjz++7IXnd2zdsvrll1t27WKMAQAzjGKhcNmXrvjmTTe2d3VHLw44V8SnH3tszcvLW3btWr9qVXtbGzNMpWS2rm7m244ZO378lBlHvf2d7zItK3Y7XhfeaHEAgNY6lU4ThAzArXfceflHPpxMJpVSiAQRlNYPPPHEnAULSsXSwaFHMpVChDTATd/7/k3XXjNs+PCujo73XfLB799ys6sBMXZIX09qkOdAxGI+397e0S2lkqrf60AZC3z/W1ddJbkgZIhzK+Tzne0dRaW0Vv2sji4r1dXZme/OH0IZWusjVzcaqsZgtaM2STBCKWOs/8CAiJxzwcNMJvP800//+pe35jJpIcSgN1JKKWMH64YQQikdMsmhlIqyI5RSyigiRq8MEorWWh6EkvLgLaN9KimVlOqgsEhrrZRUQ3HwESsvIiIlSAkgVl48MqKtWjmkA4iU0dQ83Cu7ge8nk8kfXn/96WeeNWL06DAIcKgh5HDQSmnEZCpFCSmVSm65DBos20omU4wRzw8C34/0pLVmhpFI2NHt2/8aIoLv+Zz3Bdha64TjMMZAg1TS81zs8ZdBa8aYZffuR/fbDwZBIDmPFKC1tiyLGYYUIggCwbnWwAzDtEzKmFIqDAMl1ZDD5xvGkSEOQsIwnLdg4fTZs278+tebmpr2t7beeO01P73z177vv7aUp5TSTiQoIX977tm//PFPWzZsKJdKiJhKJUeOGTNrztwTTzttzPjxxWJRa23b9vbNmxc/9JBpWZVT6oHz8LSzzpo4dVoQBIiotTZN88k//nH3tm1ISPOoUaedc47gPPqTYZr7Wlqee/zxyJuO9gAAhBAehvNPPHHc5MmRIi3b3r1t2/qVK1p3txS7u8MwRATLTqQzmaYRzROmThs7aVLCcQLff92+5VdPrcXRczcCQLFQ/OwX/+v39967c8uW+oaG399zz7kX/NtZ55+X786/2qS4lDKVTu/dtesH133zhaef1kolEglCKSJ2HoDtmzc/89hj9972q4s+9rELLvmQ57rMMFpbWu674/Z0JquUjK4pIdQwjFKpOH327GkzZ/u+DwiUErdc/v3dvzmwt5Uylsnl5i9alMnlhBBaa8ZY54EDj/3+d47jREaEEIIAzDDccnnMhAkTp00jlCopH7777hefezb0fcM0GaMECSGknM+372vdun7d3599tmnkyAUnnzJr/vxXrBj886h14a3fCM55kEslr/rmdUJKADAM4ztfv7q7o9NgxqtxJFFKmU6n161ccem///szjz2WzmSSqbTv+0EQhGHo+z5lrL6x0fe8W2644affvdFOJJRSpmkmkklmsEw2m85mM7mck0pp0ImEYxpmdAJaadOyt27YUOjqrm9szNXX+667ae3a3uA50oedSGjQtm2nM5lkKpXKZJhhWLbNmEEQeeDfccvNz/zxj5SQVDqtleJcCCm5ECEPEXQylbLsRGdb28N3/eaxBx+gjEGN/OhajxwVEAAoZd1BePZ733vBRRfd95vfDB/evH716p9+7/tXX3/dkGmPIVFKJpzEjq1b/uuTn8x3djY0NpVKhWxd/YUf/tCMo48G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">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -557,6 +563,7 @@
   .proj-row .proj-meta { flex: 1; min-width: 0; }
   .proj-row .proj-title { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .proj-row .proj-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #999; }
+  body.quick .qopt { display: none !important; }
 </style>
 </head>
 <body>
@@ -657,6 +664,19 @@
         </label>
       </div>
 
+      <details id="housePanel" style="margin-top: 16px; border: 1.5px solid #D5CFC1; background: #FFF;">
+        <summary style="cursor: pointer; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ House style (your voice — set once)</summary>
+        <div style="padding: 6px 16px 16px;">
+          <label class="input-label">Voice / tone / audience</label>
+          <textarea class="input" id="houseStyle" rows="3" placeholder="e.g. Punchy, casual Bahasa Indonesia for a general viral-news audience. Lead with emotion. Avoid stiff/formal news language. Never sensationalize real people beyond the facts." style="font-size:14px; resize:vertical;"></textarea>
+          <label class="input-label" style="margin-top:12px;">Your best hooks (examples, one per line)</label>
+          <textarea class="input" id="houseHooks" rows="3" placeholder="Paste a few of your best-performing past hooks here. Claude will match their style." style="font-size:14px; resize:vertical;"></textarea>
+          <label class="input-label" style="margin-top:12px;">Brand hashtags (always added to the caption)</label>
+          <input class="input" id="brandHashtags" type="text" placeholder="e.g. BeritaViral InfoTerkini" style="font-size:14px;">
+          <div class="note" style="margin-top:8px;">Saved on this browser and applied to every post until you change it.</div>
+        </div>
+      </details>
+
       <div class="controls-row">
         <button class="btn" id="fetchBtn">Fetch article</button>
         <span id="statusContainer"></span>
@@ -730,6 +750,7 @@
         <button type="button" class="btn-tiny" id="newProjectBtn">＋ New</button>
         <button type="button" class="btn-tiny" id="projectsBtn">🗂 Projects</button>
         <button type="button" class="btn-tiny" id="downloadProjectBtn">⬇ Download</button>
+        <button type="button" class="btn-tiny" id="quickModeBtn">⚡ Quick</button>
         <span id="projectNameTag" class="proj-name"></span>
       </div>
 
@@ -788,7 +809,18 @@
             <input class="input" id="coverNote" type="text" placeholder="e.g. Image is illustration only, not the actual event" style="font-size: 14px;">
           </div>
 
-          <details id="designPanel" style="margin-top: 14px; border: 1.5px solid #D5CFC1; background: #FFF;">
+          <details id="libraryPanel" style="margin-top: 14px; border: 1.5px solid #D5CFC1; background: #FFF;">
+            <summary style="cursor: pointer; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Image library (reusable photos)</summary>
+            <div style="padding: 6px 16px 16px;">
+              <div class="note" style="margin-bottom: 10px;">Save photos you reuse — logos, backgrounds, recurring topics. Stored on this browser only. Tap a saved photo to drop it into the cover.</div>
+              <button type="button" class="btn-secondary" id="addToLibraryBtn">+ Save current cover image</button>
+              <div id="libraryGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;"></div>
+            </div>
+          </details>
+
+          <div id="varietyNudge" class="hidden" style="margin-top: 14px; padding: 10px 14px; border: 1.5px solid #C8860B; background: #FFF8EC; color: #8a5a00; font-size: 13px; line-height: 1.45;"></div>
+
+          <details id="designPanel" class="qopt" style="margin-top: 14px; border: 1.5px solid #D5CFC1; background: #FFF;">
             <summary style="cursor: pointer; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Design — layout, colours, watermark</summary>
             <div style="padding: 6px 16px 18px;">
               <div class="input-label" style="margin-top: 8px;">Layout</div>
@@ -868,6 +900,7 @@
         </div>
 
         <div class="col-rest">
+          <div class="qopt">
           <div class="section-label" id="jumpCaption" style="margin-top: 32px;">Summary (for the caption)</div>
           <div class="summary-box" id="summaryBox"></div>
           <div class="controls-row" style="margin-top: 10px;">
@@ -895,8 +928,9 @@
           <div class="controls-row" style="margin-top: 12px;">
             <button class="btn-secondary" id="copyImagePromptBtn">📋 Copy Image Prompt</button>
           </div>
+          </div>
 
-          <details id="jumpCarousel" style="margin-top: 32px; border: 1.5px solid #D5CFC1; background: #FFF;">
+          <details id="jumpCarousel" class="qopt" style="margin-top: 32px; border: 1.5px solid #D5CFC1; background: #FFF;">
             <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Carousel builder (5 slides)</summary>
             <div style="padding: 8px 18px 18px;">
               <div class="note" style="margin-bottom: 16px;">Slide 1 uses the cover photo + box. Slides 2–5 are big text on the blue background. Edit any text and the preview updates. Download each, or all at once.</div>
@@ -905,7 +939,7 @@
             </div>
           </details>
 
-          <details style="margin-top: 12px; border: 1.5px solid #D5CFC1; background: #FFF;">
+          <details class="qopt" style="margin-top: 12px; border: 1.5px solid #D5CFC1; background: #FFF;">
             <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Reel script (15-sec video narration)</summary>
             <div style="padding: 0 18px 18px;">
               <div id="reelBox" style="font-family: 'Fraunces', serif; font-size: 15px; line-height: 1.6;"></div>
@@ -916,7 +950,17 @@
           <div class="section-label" style="margin-top: 32px;">Signature</div>
           <input class="sig-input" id="signatureInput" value="~MS" placeholder="~Your initials">
 
-          <div class="controls-row" style="margin-top: 24px;">
+          <div id="verifyPanel" class="hidden" style="margin-top: 28px; border: 1.5px solid #D72638; background: #FFF; padding: 14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#D72638; margin-bottom:8px;">⚠ Verify before posting</div>
+            <div class="note" style="margin-bottom:10px;">Tick each fact once you've confirmed it against the source. Posting fast is when mistakes slip out.</div>
+            <div id="verifyList"></div>
+          </div>
+
+          <div class="section-label" style="margin-top: 28px;">Caption preview</div>
+          <div id="captionMeta" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#888; margin-bottom:6px;"></div>
+          <div id="captionPreview" style="background:#FFF; border:1.5px solid #D5CFC1; padding:14px 16px; white-space:pre-wrap; font-family:'Fraunces',serif; font-size:15px; line-height:1.6; max-height:300px; overflow:auto;"></div>
+
+          <div class="controls-row" style="margin-top: 16px;">
             <button class="btn" id="copyCaptionBtn">📋 Copy Caption</button>
           </div>
         </div>
@@ -941,6 +985,24 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.18</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Cover image saved in projects</strong>: reopening a saved project now brings back the photo you uploaded — no re-upload needed (images only; videos still re-added). The crash-restore also keeps the last image.</li>
+          <li><strong>Image library</strong>: save reusable photos (logos, backgrounds, recurring topics) and tap to drop them into the cover. Stored on this browser.</li>
+          <li><strong>Installable app (PWA)</strong>: add NewsForge to your phone or desktop home screen and open it offline. Requires uploading the extra app files alongside index.html.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.17</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Variety guard</strong>: warns when your last 3 posts used the same layout / hook style / colour, so your feed doesn't look repetitive.</li>
+          <li><strong>Quick mode</strong> (⚡ in the toolbar): hides the carousel, reel, image prompt, and design panel for a fast hook → image → caption flow. Toggle anytime.</li>
+          <li><strong>Project search</strong>: a search box in Projects to check "have I covered this?" before posting.</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.16</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>House style</strong> (set once): your voice/tone + example hooks get baked into every prompt, plus brand hashtags added to every caption.</li>
+          <li><strong>Caption preview</strong> with a live character count and the Facebook "See more" fold line.</li>
+          <li><strong>Verify-before-posting checklist</strong>: the key facts (names, numbers, quotes) to confirm against the source before you post.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.15</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li>Added a <strong>"My Projects" button on the landing page</strong> so saved projects can be reopened right after loading (previously the library was only reachable from inside a processed article).</li>
@@ -1019,7 +1081,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.15 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.18 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -1046,6 +1108,7 @@
     <div class="modal-card">
       <div class="modal-title">Projects</div>
       <div class="note" style="margin-bottom:14px;">Saved on this browser only. Text + cover settings are kept; photos/videos are re-added when you reopen. Use Download for a permanent backup.</div>
+      <input class="input" id="projectsSearch" type="text" placeholder="Search past projects (have I covered this?)…" style="font-size:14px; margin-bottom:12px;">
       <div id="projectsList" style="max-height:50vh; overflow:auto;"></div>
       <div class="controls-row" style="margin-top:16px;">
         <button class="btn-secondary" id="projectsCloseBtn" type="button">Close</button>
@@ -1306,10 +1369,21 @@ function buildPrompt(article) {
 - rephrased_post must be a genuine rewrite, NOT a light paraphrase: if a sentence could be found by searching the source text, reword it further. Different structure, same facts.`
     : '';
 
+  const houseStyle = ($('houseStyle') && $('houseStyle').value.trim()) || '';
+  const houseHooks = ($('houseHooks') && $('houseHooks').value.trim()) || '';
+  const houseBlock = houseStyle ? `
+HOUSE STYLE / VOICE — follow this for tone, framing, and audience:
+${houseStyle}
+` : '';
+  const hookExamples = houseHooks ? `
+MATCH THE STYLE of these example hooks the author likes (mimic their voice and rhythm; do NOT copy them literally):
+${houseHooks}
+` : '';
+
   return `You are repackaging a news article into a Facebook post for a PERSONAL BLOG that seeks audience attention and engagement — NOT a neutral news wire. The hooks should grab attention and earn clicks and shares.
 
 LANGUAGE: ${langRule} (The image_prompt is the ONLY field that must always be in English, since image tools work best in English.)
-
+${houseBlock}${hookExamples}
 ARTICLE TITLE:
 ${article.title}
 
@@ -1339,7 +1413,8 @@ Output ONLY a JSON object with EXACTLY this structure. No preamble, no markdown 
   ],
   "reel_script": "A 15-second voiceover narration script (3-4 short punchy sentences) summarizing the story for a short video. Hook the viewer in the first sentence.",
   "image_prompt": "A single vivid image-generation prompt (for tools like Nano Banana or Midjourney) depicting a scene that matches this article's topic and mood. Describe subject, setting, expression, lighting, and composition in one paragraph. Do NOT depict real named public figures. Style: ${styleHint}.",
-  "hashtags": ["array", "of", "5to8", "relevant", "topical", "hashtags", "no", "hashsymbol"]${rephraseField}
+  "hashtags": ["array", "of", "5to8", "relevant", "topical", "hashtags", "no", "hashsymbol"],
+  "claims_to_verify": ["3-5 short phrases naming the key checkable facts you used (names, numbers, dates, quotes) that the author should confirm against the source before posting"]${rephraseField}
 }
 
 Rules:
@@ -1468,6 +1543,8 @@ function renderStep4() {
       el.classList.toggle('selected', parseInt(el.dataset.idx) === i);
     });
     renderComposite();
+    renderCaptionPreview();
+    checkVariety();
   }
 
   // Select by clicking the card (but not the textarea or copy button)
@@ -1484,6 +1561,7 @@ function renderStep4() {
       const i = parseInt(ta.dataset.hookedit);
       state.editableHooks[i] = ta.value;
       if (i === state.selectedHookIdx) renderComposite();
+      renderCaptionPreview();
     });
   });
   // Copy a single hook
@@ -1525,6 +1603,9 @@ function renderStep4() {
 
   renderComposite();
   renderCarousel();
+  renderVerify();
+  renderCaptionPreview();
+  checkVariety();
   $('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1650,6 +1731,7 @@ function redrawCover() {
     drawComposite(canvas, null, coverHookText(), null, 0, 0, coverDesign());
   }
   scheduleAutosave();
+  checkVariety();
 }
 
 function renderComposite() {
@@ -1949,6 +2031,7 @@ function loadCoverImageFile(file) {
     state.coverOffsetX = 0; state.coverOffsetY = 0; // re-center new image
     if ($('imageScale')) { $('imageScale').value = 1; $('imageScaleValue').textContent = '1.0×'; }
     renderComposite(); // cover only — carousel slide 1 is independent
+    if (state.generated) storeCover('draft'); // keep it in the crash-restore net
     showToast('Cover image loaded');
   };
   reader.onerror = () => showToast('Could not read that image file');
@@ -2131,6 +2214,7 @@ function clearCover() {
   }
   state.coverOffsetX = 0; state.coverOffsetY = 0;
   if ($('imageScale')) { $('imageScale').value = 1; $('imageScaleValue').textContent = '1.0×'; }
+  try { idbDelete('covers', 'draft'); } catch (e) {}
   redrawCover();
   showToast('Cleared — picture area is transparent');
 }
@@ -2311,9 +2395,11 @@ function loadVideoUpload(e) {
 function buildCaption() {
   if (!state.generated || !state.article) return '';
   const sig = $('signatureInput').value.trim() || '~MS';
-  const tags = state.generated.hashtags
-    .map(h => '#' + String(h).replace(/^#/, ''))
-    .join(' ');
+  const brand = ((($('brandHashtags') && $('brandHashtags').value) || '').split(/[\s,]+/)).map(s => s.replace(/^#/, '')).filter(Boolean);
+  const genTags = (state.generated.hashtags || []).map(h => String(h).replace(/^#/, ''));
+  const seen = new Set(); const merged = [];
+  genTags.concat(brand).forEach(t => { const k = t.toLowerCase(); if (t && !seen.has(k)) { seen.add(k); merged.push(t); } });
+  const tags = merged.map(h => '#' + h).join(' ');
   const hook = (state.editableHooks && state.editableHooks[state.selectedHookIdx] != null)
     ? state.editableHooks[state.selectedHookIdx]
     : (state.selectedHookIdx === 0 ? state.article.title : state.generated.hooks[state.selectedHookIdx - 1]);
@@ -2325,6 +2411,52 @@ function buildCaption() {
   return `${hook}\n\n${state.generated.summary}${question}\n\n${sig} ${tags}${sourceLine}`;
 }
 
+// Caption preview with character count + Facebook "See more" fold marker (~125 chars)
+function renderCaptionPreview() {
+  const prev = $('captionPreview'); if (!prev) return;
+  const text = buildCaption();
+  const FOLD = 125;
+  const meta = $('captionMeta');
+  if (!text) { prev.textContent = ''; if (meta) meta.textContent = ''; return; }
+  if (text.length <= FOLD) {
+    prev.textContent = text;
+  } else {
+    prev.innerHTML = '';
+    const before = document.createElement('span'); before.textContent = text.slice(0, FOLD);
+    const marker = document.createElement('span');
+    marker.textContent = ' …See more ';
+    marker.style.cssText = 'color:#D72638;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;';
+    const after = document.createElement('span'); after.textContent = text.slice(FOLD); after.style.opacity = '0.5';
+    prev.appendChild(before); prev.appendChild(marker); prev.appendChild(after);
+  }
+  if (meta) meta.textContent = 'Before "See more": ' + Math.min(text.length, FOLD) + ' chars · Total: ' + text.length + ' chars';
+}
+
+// Verify-before-posting checklist (Claude's claims + a regex backup for numbers/quotes)
+function renderVerify() {
+  const panel = $('verifyPanel'), list = $('verifyList');
+  if (!panel || !list) return;
+  const items = [];
+  const claims = state.generated && state.generated.claims_to_verify;
+  if (Array.isArray(claims)) claims.forEach(c => { if (c && String(c).trim()) items.push(String(c).trim()); });
+  // backup: pull quotes and numbers from the summary if Claude gave few claims
+  if (items.length < 2 && state.generated && state.generated.summary) {
+    const s = state.generated.summary;
+    (s.match(/[""'][^""']{8,}[""']/g) || []).slice(0, 3).forEach(q => items.push('Quote: ' + q));
+    (s.match(/\b\d[\d.,]*\s?(%|persen|juta|miliar|ribu|orang|tahun)?\b/g) || []).slice(0, 4).forEach(n => items.push('Number: ' + n.trim()));
+  }
+  if (!items.length) { panel.classList.add('hidden'); list.innerHTML = ''; return; }
+  list.innerHTML = '';
+  items.forEach((c, i) => {
+    const row = document.createElement('label');
+    row.style.cssText = 'display:flex; align-items:flex-start; gap:8px; margin:6px 0; font-size:14px; line-height:1.45; cursor:pointer;';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.style.cssText = 'margin-top:3px; width:16px; height:16px; accent-color:#D72638;';
+    const sp = document.createElement('span'); sp.textContent = c;
+    row.appendChild(cb); row.appendChild(sp); list.appendChild(row);
+  });
+  panel.classList.remove('hidden');
+}
+
 function copyCaption() {
   const text = buildCaption();
   if (!text) return;
@@ -2332,6 +2464,31 @@ function copyCaption() {
     () => showToast('Caption copied'),
     () => showToast('Copy failed — select manually')
   );
+  recordPostChoice();
+}
+
+// Variety guard — remember recent choices and nudge the user to vary them
+function loadRecentChoices() { try { return JSON.parse(localStorage.getItem('newsforge_recent') || '[]'); } catch (e) { return []; } }
+function recordPostChoice() {
+  const r = loadRecentChoices();
+  r.unshift({ layout: state.coverLayout, primary: state.colors.primary, hookIdx: state.selectedHookIdx, ts: Date.now() });
+  while (r.length > 8) r.pop();
+  try { localStorage.setItem('newsforge_recent', JSON.stringify(r)); } catch (e) {}
+}
+function checkVariety() {
+  const el = $('varietyNudge'); if (!el) return;
+  const r = loadRecentChoices().slice(0, 3);
+  if (r.length < 3) { el.classList.add('hidden'); return; }
+  const msgs = [];
+  if (r.every(x => x.layout === state.coverLayout)) msgs.push('the same layout');
+  if (r.every(x => x.hookIdx === state.selectedHookIdx)) msgs.push('the same hook style');
+  if (r.every(x => x.primary === state.colors.primary)) msgs.push('the same colour');
+  if (msgs.length) {
+    el.textContent = '↻ Your last 3 posts used ' + msgs.join(' and ') + '. Mixing it up keeps your feed from looking repetitive.';
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
 }
 
 function copyImagePrompt() {
@@ -2447,6 +2604,142 @@ function resetForm() {
 }
 
 // ============================================================
+// Image storage (IndexedDB) — covers per project + reusable library
+// ============================================================
+const IDB_NAME = 'newsforge_media';
+const IDB_VERSION = 1;
+let _idbPromise = null;
+function idbOpen() {
+  if (_idbPromise) return _idbPromise;
+  _idbPromise = new Promise((resolve, reject) => {
+    if (!window.indexedDB) { reject(new Error('no indexeddb')); return; }
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('covers')) db.createObjectStore('covers');
+      if (!db.objectStoreNames.contains('library')) db.createObjectStore('library');
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return _idbPromise;
+}
+async function idbPut(store, key, value) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).put(value, key);
+    tx.oncomplete = () => res(true);
+    tx.onerror = () => rej(tx.error);
+  });
+}
+async function idbGet(store, key) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const r = tx.objectStore(store).get(key);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbDelete(store, key) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).delete(key);
+    tx.oncomplete = () => res(true);
+    tx.onerror = () => rej(tx.error);
+  });
+}
+async function idbAll(store) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const s = tx.objectStore(store);
+    const out = [];
+    const cur = s.openCursor();
+    cur.onsuccess = () => { const c = cur.result; if (c) { out.push({ key: c.key, value: c.value }); c.continue(); } else res(out); };
+    cur.onerror = () => rej(cur.error);
+  });
+}
+
+// Downscale + recompress an image dataURL so stored copies stay small
+function compressImage(dataUrl, maxW, quality) {
+  maxW = maxW || 1280; quality = quality || 0.82;
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      try { resolve(c.toDataURL('image/jpeg', quality)); } catch (e) { resolve(dataUrl); }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+// Store/remove the current uploaded cover image under a key (projectId or 'draft')
+async function storeCover(key) {
+  try {
+    if (state.uploadedImageDataUrl) {
+      const small = await compressImage(state.uploadedImageDataUrl);
+      await idbPut('covers', key, small);
+    } else {
+      await idbDelete('covers', key);
+    }
+  } catch (e) { /* IDB unavailable — text still saves, image just won't persist */ }
+}
+
+// ---- Reusable image library (global, this device) ----
+const LIBRARY_CAP = 40;
+async function addToLibrary() {
+  if (!state.uploadedImageDataUrl) { showToast('Load a cover image first, then save it'); return; }
+  try {
+    const existing = await idbAll('library');
+    if (existing.length >= LIBRARY_CAP) { showToast('Library is full (' + LIBRARY_CAP + ') — delete a few first'); return; }
+    const small = await compressImage(state.uploadedImageDataUrl, 1280, 0.8);
+    const name = (state.article && state.article.title) ? state.article.title.slice(0, 40) : 'Image';
+    await idbPut('library', 'lib' + Date.now(), { name: name, dataUrl: small, ts: Date.now() });
+    showToast('Saved to library');
+    renderLibrary();
+  } catch (e) { showToast('Could not save to library on this browser'); }
+}
+function useLibraryImage(dataUrl) {
+  state.uploadedImageDataUrl = dataUrl;
+  state.coverCleared = false;
+  state.coverOffsetX = 0; state.coverOffsetY = 0;
+  if ($('imageScale')) { $('imageScale').value = 1; $('imageScaleValue').textContent = '1.0×'; }
+  renderComposite();
+  if (state.generated) storeCover('draft');
+  showToast('Image dropped into cover');
+}
+async function renderLibrary() {
+  const grid = $('libraryGrid'); if (!grid) return;
+  let items = [];
+  try { items = await idbAll('library'); } catch (e) { grid.innerHTML = '<div class="note">Image library is not available on this browser.</div>'; return; }
+  items.sort((a, b) => (b.value.ts || 0) - (a.value.ts || 0));
+  grid.innerHTML = '';
+  if (!items.length) { grid.innerHTML = '<div class="note">No saved photos yet.</div>'; return; }
+  items.forEach(it => {
+    const cell = document.createElement('div');
+    cell.style.cssText = 'position:relative; width:64px; height:64px; border:1.5px solid #D5CFC1; overflow:hidden; cursor:pointer; flex:0 0 auto;';
+    cell.title = it.value.name || 'Use this image';
+    const im = document.createElement('img');
+    im.src = it.value.dataUrl; im.alt = it.value.name || '';
+    im.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
+    im.addEventListener('click', () => useLibraryImage(it.value.dataUrl));
+    const del = document.createElement('button');
+    del.type = 'button'; del.textContent = '×'; del.title = 'Delete';
+    del.style.cssText = 'position:absolute; top:0; right:0; width:18px; height:18px; line-height:16px; padding:0; border:none; background:rgba(215,38,56,0.9); color:#fff; font-size:13px; cursor:pointer;';
+    del.addEventListener('click', async (e) => { e.stopPropagation(); try { await idbDelete('library', it.key); } catch (_) {} renderLibrary(); });
+    cell.appendChild(im); cell.appendChild(del);
+    grid.appendChild(cell);
+  });
+}
+
+// ============================================================
 // Projects library + draft autosave (localStorage, this device only)
 // ============================================================
 function loadProjects() { try { const r = localStorage.getItem('newsforge_projects'); return r ? JSON.parse(r) : []; } catch (e) { return []; } }
@@ -2481,14 +2774,18 @@ function updateProjectNameTag() {
   if (tag) tag.textContent = state.projectName ? ('· ' + state.projectName) : '· unsaved';
 }
 
-function saveProject() {
+async function saveProject() {
   if (!state.generated || !state.article) { showToast('Nothing to save yet'); return; }
   const projs = loadProjects();
   if (!state.projectId) { state.projectId = 'p' + Date.now(); state.projectName = autoProjectName(); }
   const rec = { id: state.projectId, name: state.projectName, savedAt: Date.now(), data: currentProjectData() };
   const idx = projs.findIndex(p => p.id === state.projectId);
   if (idx >= 0) projs[idx] = rec; else projs.unshift(rec);
-  if (saveProjects(projs)) { updateProjectNameTag(); showToast('Saved: ' + state.projectName); }
+  if (saveProjects(projs)) {
+    await storeCover(state.projectId); // keep the uploaded cover image (image mode only)
+    updateProjectNameTag();
+    showToast('Saved: ' + state.projectName);
+  }
 }
 
 function newProject() {
@@ -2529,7 +2826,7 @@ function applyProjectData(data) {
   $('step4').classList.remove('hidden');
 }
 
-function loadProject(id) {
+async function loadProject(id) {
   const p = loadProjects().find(x => x.id === id);
   if (!p) return;
   applyProjectData(p.data);
@@ -2537,8 +2834,14 @@ function loadProject(id) {
   state.projectName = p.name;
   updateProjectNameTag();
   closeProjects();
+  // restore the saved cover image if there is one
+  let restored = false;
+  try {
+    const cover = await idbGet('covers', id);
+    if (cover) { state.uploadedImageDataUrl = cover; state.coverCleared = false; renderComposite(); restored = true; }
+  } catch (e) {}
   requestAnimationFrame(() => { const n = $('step4Nav') || $('step4'); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
-  showToast('Opened: ' + p.name + ' — re-add your photo/video');
+  showToast(restored ? 'Opened: ' + p.name : 'Opened: ' + p.name + ' — re-add your photo/video');
 }
 
 function renameProject(id) {
@@ -2555,14 +2858,23 @@ function renameProject(id) {
 function deleteProject(id) {
   const projs = loadProjects().filter(x => x.id !== id);
   saveProjects(projs);
+  try { idbDelete('covers', id); } catch (e) {}
   if (state.projectId === id) { state.projectId = null; state.projectName = ''; updateProjectNameTag(); }
   renderProjectsList();
 }
 
 function renderProjectsList() {
-  const projs = loadProjects();
+  let projs = loadProjects();
   const box = $('projectsList');
+  const q = (($('projectsSearch') && $('projectsSearch').value) || '').trim().toLowerCase();
   if (!projs.length) { box.innerHTML = '<div class="note">No saved projects yet. Hit Save to add one.</div>'; return; }
+  if (q) {
+    projs = projs.filter(p => {
+      const hay = (p.name + ' ' + ((p.data && p.data.article && p.data.article.title) || '') + ' ' + ((p.data && p.data.article && p.data.article.source) || '')).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    if (!projs.length) { box.innerHTML = '<div class="note">No saved project matches "' + q + '".</div>'; return; }
+  }
   box.innerHTML = '';
   projs.forEach(p => {
     const row = document.createElement('div'); row.className = 'proj-row';
@@ -2587,7 +2899,7 @@ function scheduleAutosave() { if (!state.generated) return; clearTimeout(_autosa
 function writeDraft() {
   try { localStorage.setItem('newsforge_draft', JSON.stringify({ projectId: state.projectId, projectName: state.projectName, data: currentProjectData(), ts: Date.now() })); } catch (e) {}
 }
-function clearDraft() { try { localStorage.removeItem('newsforge_draft'); } catch (e) {} }
+function clearDraft() { try { localStorage.removeItem('newsforge_draft'); } catch (e) {} try { idbDelete('covers', 'draft'); } catch (e) {} }
 function maybeOfferRestore() {
   let d = null;
   try { const r = localStorage.getItem('newsforge_draft'); d = r ? JSON.parse(r) : null; } catch (e) {}
@@ -2718,16 +3030,45 @@ $('newProjectBtn').addEventListener('click', newProject);
 $('projectsBtn').addEventListener('click', openProjects);
 $('openProjectsTop').addEventListener('click', openProjects);
 $('downloadProjectBtn').addEventListener('click', downloadProject);
+$('quickModeBtn').addEventListener('click', () => setQuickMode(!document.body.classList.contains('quick')));
+$('addToLibraryBtn').addEventListener('click', addToLibrary);
+function setQuickMode(on) {
+  document.body.classList.toggle('quick', on);
+  const b = $('quickModeBtn'); if (b) b.classList.toggle('active', on);
+  try { localStorage.setItem('newsforge_quick', on ? '1' : '0'); } catch (e) {}
+}
 $('projectsCloseBtn').addEventListener('click', closeProjects);
+$('projectsSearch').addEventListener('input', renderProjectsList);
 $('projectsModal').addEventListener('click', (e) => { if (e.target === $('projectsModal')) closeProjects(); });
-$('signatureInput').addEventListener('input', scheduleAutosave);
+$('signatureInput').addEventListener('input', () => { renderCaptionPreview(); scheduleAutosave(); });
 // Rephrase toggle rebuilds the prompt if it's already on screen
 $('wantRephrase').addEventListener('change', () => { if (state.article && !$('step2').classList.contains('hidden')) $('promptOutput').value = buildPrompt(state.article); });
+
+// House style + brand hashtags: persist on this browser, apply everywhere
+(function setupHouseStyle() {
+  ['houseStyle', 'houseHooks', 'brandHashtags'].forEach(id => {
+    const el = $(id); if (!el) return;
+    try { const v = localStorage.getItem('newsforge_' + id); if (v != null) el.value = v; } catch (e) {}
+    el.addEventListener('input', () => {
+      try { localStorage.setItem('newsforge_' + id, el.value); } catch (e) {}
+      if (id === 'brandHashtags') renderCaptionPreview();
+      if ((id === 'houseStyle' || id === 'houseHooks') && state.article && !$('step2').classList.contains('hidden')) {
+        $('promptOutput').value = buildPrompt(state.article);
+      }
+    });
+  });
+})();
 // Restore-after-crash banner
-$('restoreYesBtn').addEventListener('click', () => {
+$('restoreYesBtn').addEventListener('click', async () => {
   const d = state._pendingDraft;
   $('restoreBanner').classList.add('hidden');
-  if (d && d.data) { applyProjectData(d.data); state.projectId = d.projectId || null; state.projectName = d.projectName || ''; updateProjectNameTag(); requestAnimationFrame(() => { const n = $('step4Nav') || $('step4'); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); showToast('Restored — re-add your photo/video'); }
+  if (d && d.data) {
+    applyProjectData(d.data); state.projectId = d.projectId || null; state.projectName = d.projectName || ''; updateProjectNameTag();
+    let restored = false;
+    try { const cover = await idbGet('covers', 'draft'); if (cover) { state.uploadedImageDataUrl = cover; state.coverCleared = false; renderComposite(); restored = true; } } catch (e) {}
+    requestAnimationFrame(() => { const n = $('step4Nav') || $('step4'); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    showToast(restored ? 'Restored your last draft' : 'Restored — re-add your photo/video');
+  }
 });
 $('restoreNoBtn').addEventListener('click', () => { $('restoreBanner').classList.add('hidden'); clearDraft(); });
 $('clearHistoryBtn').addEventListener('click', clearAllHistory);
@@ -2855,6 +3196,16 @@ $('recenterBtn').addEventListener('click', () => {
 renderHistory();
 updateProjectNameTag();
 maybeOfferRestore();
+try { if (localStorage.getItem('newsforge_quick') === '1') setQuickMode(true); } catch (e) {}
+renderLibrary();
+</script>
+<script>
+// PWA: register the service worker for install + offline (no effect when opened as a local file)
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('service-worker.js').catch(function () {});
+  });
+}
 </script>
 </body>
 </html>
