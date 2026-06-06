@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NewsForge — Manual mode (uses Claude.ai chat, no API key)</title>
+<title>NewsForge — Image / video editor</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#D72638">
 <meta name="mobile-web-app-capable" content="yes">
@@ -564,6 +564,12 @@
   .proj-row .proj-title { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .proj-row .proj-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #999; }
   body.quick .qopt { display: none !important; }
+  body.editor .genonly, body.editor .col-rest { display: none !important; }
+  .editoronly { display: none; }
+  body.editor .editoronly { display: block; }
+  /* Standalone editor page: only the editor is shown */
+  .step:not(#step4) { display: none !important; }
+  #historySection { display: none !important; }
 </style>
 </head>
 <body>
@@ -571,9 +577,9 @@
     <header>
       <div class="logo">News<span class="accent">Forge</span></div>
       <div class="meta">
-        <span class="mode">MANUAL MODE</span><br>
-        USES YOUR CLAUDE.AI CHAT<br>
-        NO API KEY REQUIRED
+        <span class="mode">IMAGE / VIDEO EDITOR</span><br>
+        MAKE A COVER OR VIDEO<br>
+        NO ARTICLE NEEDED
       </div>
     </header>
 
@@ -743,19 +749,20 @@
     <div class="step hidden" id="step4">
       <div>
         <span class="step-number">4</span>
-        <span class="step-title">Pick hook, image, post</span>
+        <span class="step-title" id="step4Title">Pick hook, image, post</span>
       </div>
 
       <div class="step4-tools" id="step4Tools">
-        <button type="button" class="btn-tiny" id="saveProjectBtn">💾 Save</button>
-        <button type="button" class="btn-tiny" id="newProjectBtn">＋ New</button>
-        <button type="button" class="btn-tiny" id="projectsBtn">🗂 Projects</button>
-        <button type="button" class="btn-tiny" id="downloadProjectBtn">⬇ Download</button>
-        <button type="button" class="btn-tiny" id="quickModeBtn">⚡ Quick</button>
-        <span id="projectNameTag" class="proj-name"></span>
+        <button type="button" class="btn-tiny genonly" id="saveProjectBtn">💾 Save</button>
+        <button type="button" class="btn-tiny genonly" id="newProjectBtn">＋ New</button>
+        <button type="button" class="btn-tiny genonly" id="projectsBtn">🗂 Projects</button>
+        <button type="button" class="btn-tiny genonly" id="downloadProjectBtn">⬇ Download</button>
+        <button type="button" class="btn-tiny genonly" id="quickModeBtn">⚡ Quick</button>
+        <button type="button" class="btn-tiny editoronly" id="exitEditorBtn">← Back to NewsForge</button>
+        <span id="projectNameTag" class="proj-name genonly"></span>
       </div>
 
-      <div class="step4-nav" id="step4Nav">
+      <div class="step4-nav genonly" id="step4Nav">
         <span class="s4label">Jump:</span>
         <button type="button" data-jump="jumpHooks">Hooks</button>
         <button type="button" data-jump="jumpCover">Cover</button>
@@ -765,11 +772,18 @@
 
       <div class="results-grid">
         <div class="col-top" id="jumpHooks">
-          <div class="section-label">Source headline</div>
-          <div class="article-preview" id="sourceHeadlineBox" style="margin-bottom: 24px;"></div>
+          <div class="genonly">
+            <div class="section-label">Source headline</div>
+            <div class="article-preview" id="sourceHeadlineBox" style="margin-bottom: 24px;"></div>
 
-          <div class="section-label">Pick a hook (for the image)</div>
-          <div id="hooksList"></div>
+            <div class="section-label">Pick a hook (for the image)</div>
+            <div id="hooksList"></div>
+          </div>
+          <div class="editoronly">
+            <div class="section-label">Overlay text (on the image)</div>
+            <textarea class="input" id="editorOverlay" rows="3" placeholder="Type the text to show on your cover — or leave blank for an image/video with no text." style="font-size:15px; resize:vertical;"></textarea>
+            <div class="note" style="margin-top:8px;">Switch Image / Video above the canvas. Style the look in the Design panel under the cover (layout, colours, watermark). Reuse photos from the Image library.</div>
+          </div>
         </div>
 
         <!-- COVER: right column on desktop; sits between hooks and summary on mobile -->
@@ -1000,7 +1014,7 @@
         </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.19</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
-          <li><strong>Image / video editor is now its own page.</strong> A button on the home screen opens a separate composer for making a cover or video with your own overlay text — no article needed. The main flow stays focused on turning news into posts.</li>
+          <li><strong>Image / video editor mode</strong>: a button on the home screen opens the cover/video composer straight away — no article needed. Upload an image or video, type your own overlay text, style it with the design panel and image library, and export. "Back to full mode" returns to the normal flow.</li>
         </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.18</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
@@ -1534,6 +1548,9 @@ function parseResponse() {
 // STEP 4: Render results
 // ============================================================
 function renderStep4() {
+  state.editorOnly = false;
+  document.body.classList.remove('editor');
+  if ($('step4Title')) $('step4Title').textContent = 'Pick hook, image, post';
   $('step4').classList.remove('hidden');
 
   $('sourceHeadlineBox').innerHTML = `
@@ -1731,6 +1748,7 @@ function downloadAllSlides() {
 // Canvas composite
 // ============================================================
 function coverHookText() {
+  if (state.editorOnly) return state.editorOverlay || '';
   return (state.editableHooks && state.editableHooks[state.selectedHookIdx] != null)
     ? state.editableHooks[state.selectedHookIdx]
     : (state.selectedHookIdx === 0 ? state.article.title : state.generated.hooks[state.selectedHookIdx - 1]);
@@ -2919,9 +2937,38 @@ function renderProjectsList() {
 function openProjects() { renderProjectsList(); $('projectsModal').classList.remove('hidden'); }
 function closeProjects() { $('projectsModal').classList.add('hidden'); }
 
+// Editor-only mode: jump straight into the image / video composer, no article needed
+function openEditor() {
+  state.editorOnly = true;
+  state.article = { title: '', url: 'manual entry', source: '', heroImage: null };
+  state.generated = { hooks: [], summary: '', discussion_question: '', hashtags: [], carousel_slides: ['', '', '', '', ''], reel_script: '', image_prompt: '' };
+  state.editableHooks = null;
+  state.selectedHookIdx = 1;
+  state.editorOverlay = '';
+  state.uploadedImageDataUrl = null; state.coverImgEl = null; state.coverCleared = false;
+  state.videoEl = null;
+  state.projectId = null; state.projectName = '';
+  document.body.classList.add('editor');
+  if ($('editorOverlay')) $('editorOverlay').value = '';
+  if ($('coverNote')) $('coverNote').value = '';
+  state.coverNote = '';
+  if ($('step4Title')) $('step4Title').textContent = 'Image / video editor';
+  $('step4').classList.remove('hidden');
+  switchCoverMode('image');
+  renderComposite();
+  requestAnimationFrame(() => { const n = $('jumpCover') || $('step4'); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+}
+function closeEditor() {
+  state.editorOnly = false;
+  document.body.classList.remove('editor');
+  $('step4').classList.add('hidden');
+  if ($('step4Title')) $('step4Title').textContent = 'Pick hook, image, post';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Draft autosave (single rolling slot, crash net)
 let _autosaveTimer = null;
-function scheduleAutosave() { if (!state.generated) return; clearTimeout(_autosaveTimer); _autosaveTimer = setTimeout(writeDraft, 1200); }
+function scheduleAutosave() { if (!state.generated || state.editorOnly) return; clearTimeout(_autosaveTimer); _autosaveTimer = setTimeout(writeDraft, 1200); }
 function writeDraft() {
   try { localStorage.setItem('newsforge_draft', JSON.stringify({ projectId: state.projectId, projectName: state.projectName, data: currentProjectData(), ts: Date.now() })); } catch (e) {}
 }
@@ -3055,7 +3102,9 @@ $('saveProjectBtn').addEventListener('click', saveProject);
 $('newProjectBtn').addEventListener('click', newProject);
 $('projectsBtn').addEventListener('click', openProjects);
 $('openProjectsTop').addEventListener('click', openProjects);
-$('openEditorTop').addEventListener('click', () => { location.href = 'editor.html'; });
+$('openEditorTop').addEventListener('click', openEditor);
+$('exitEditorBtn').addEventListener('click', () => { location.href = 'index.html'; });
+$('editorOverlay').addEventListener('input', () => { state.editorOverlay = $('editorOverlay').value; redrawCover(); });
 $('downloadProjectBtn').addEventListener('click', downloadProject);
 $('quickModeBtn').addEventListener('click', () => setQuickMode(!document.body.classList.contains('quick')));
 $('addToLibraryBtn').addEventListener('click', addToLibrary);
@@ -3224,9 +3273,8 @@ $('recenterBtn').addEventListener('click', () => {
 
 renderHistory();
 updateProjectNameTag();
-maybeOfferRestore();
-try { if (localStorage.getItem('newsforge_quick') === '1') setQuickMode(true); } catch (e) {}
 renderLibrary();
+openEditor();
 </script>
 <script>
 // PWA: register the service worker for install + offline (no effect when opened as a local file)
