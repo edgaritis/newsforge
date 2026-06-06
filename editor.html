@@ -570,6 +570,11 @@
   /* Standalone editor page: only the editor is shown */
   .step:not(#step4) { display: none !important; }
   #historySection { display: none !important; }
+  body.editor #editorOverlay { max-width: 50%; }
+  @media (max-width: 900px) {
+    body.editor .results-grid { display: flex; flex-direction: column; }
+    body.editor .cover-col { order: -1; position: static; margin: 0 0 20px; }
+  }
 </style>
 </head>
 <body>
@@ -782,42 +787,7 @@
           <div class="editoronly">
             <div class="section-label">Overlay text (on the image)</div>
             <textarea class="input" id="editorOverlay" rows="3" placeholder="Type the text to show on your cover — or leave blank for an image/video with no text." style="font-size:15px; resize:vertical;"></textarea>
-            <div class="note" style="margin-top:8px;">Switch Image / Video above the canvas. Style the look in the Design panel under the cover (layout, colours, watermark). Reuse photos from the Image library.</div>
-          </div>
-        </div>
-
-        <!-- COVER: right column on desktop; sits between hooks and summary on mobile -->
-        <div class="cover-col" id="jumpCover">
-          <div class="section-label">Cover image / video</div>
-
-          <div class="mode-toggle" style="margin-bottom: 12px;">
-            <button class="mode-btn active" id="modeImageBtn" type="button">Image</button>
-            <button class="mode-btn" id="modeVideoBtn" type="button">Video</button>
-          </div>
-
-          <div class="canvas-wrap">
-            <canvas id="composeCanvas"></canvas>
-          </div>
-          <div id="canvasWarning"></div>
-          <div id="coverTip" style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">
-            Drag &amp; drop an image here to upload · after zooming, drag to reposition
-          </div>
-
-          <div id="videoControls" class="hidden" style="margin-top: 12px;">
-            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-              <button class="btn-tiny" id="vidPlayBtn" type="button">▶ Play</button>
-              <input type="range" id="vidScrub" min="0" max="1000" value="0" style="flex:1; min-width:120px; cursor:pointer; accent-color:#D72638;">
-              <span id="vidTime" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#0A0A0A; min-width:88px; text-align:right;">0:00 / 0:00</span>
-              <button class="btn-tiny" id="vidMuteBtn" type="button" title="Preview audio (export always includes audio)">🔇 Muted</button>
-              <button class="btn-tiny" id="editTrimBtn" type="button">✂ Edit trim</button>
-            </div>
-          </div>
-
-          <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <label style="font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #555; white-space: nowrap;">Zoom</label>
-            <input type="range" id="imageScale" min="1" max="2" step="0.05" value="1" style="flex: 1; cursor: pointer; accent-color: #D72638;">
-            <span id="imageScaleValue" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #0A0A0A; min-width: 36px;">1.0×</span>
-            <button class="btn-tiny" id="recenterBtn" title="Re-center" style="flex-shrink:0;">⊙ Center</button>
+            <div class="note" style="margin-top:8px;">Style the look in the Design panel below (layout, colours, watermark). Switch Image / Video on the cover preview. The cover stays pinned while you scroll.</div>
           </div>
           <div class="field" style="margin-top: 14px;">
             <label class="input-label">Note / disclaimer (optional — leave blank to remove)</label>
@@ -886,7 +856,41 @@
               <div style="margin-top:10px; font-size:12px; color:#666;">Optional logo image (replaces text): <input type="file" id="wmLogo" accept="image/*"></div>
             </div>
           </details>
+        </div>
 
+        <!-- COVER: right column on desktop; sits between hooks and summary on mobile -->
+        <div class="cover-col" id="jumpCover">
+          <div class="section-label">Cover image / video</div>
+
+          <div class="mode-toggle" style="margin-bottom: 12px;">
+            <button class="mode-btn active" id="modeImageBtn" type="button">Image</button>
+            <button class="mode-btn" id="modeVideoBtn" type="button">Video</button>
+          </div>
+
+          <div class="canvas-wrap">
+            <canvas id="composeCanvas"></canvas>
+          </div>
+          <div id="canvasWarning"></div>
+          <div id="coverTip" style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">
+            Drag &amp; drop an image here to upload · after zooming, drag to reposition
+          </div>
+
+          <div id="videoControls" class="hidden" style="margin-top: 12px;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <button class="btn-tiny" id="vidPlayBtn" type="button">▶ Play</button>
+              <input type="range" id="vidScrub" min="0" max="1000" value="0" style="flex:1; min-width:120px; cursor:pointer; accent-color:#D72638;">
+              <span id="vidTime" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#0A0A0A; min-width:88px; text-align:right;">0:00 / 0:00</span>
+              <button class="btn-tiny" id="vidMuteBtn" type="button" title="Preview audio (export always includes audio)">🔇 Muted</button>
+              <button class="btn-tiny" id="editTrimBtn" type="button">✂ Edit trim</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <label style="font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #555; white-space: nowrap;">Zoom</label>
+            <input type="range" id="imageScale" min="1" max="2" step="0.05" value="1" style="flex: 1; cursor: pointer; accent-color: #D72638;">
+            <span id="imageScaleValue" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #0A0A0A; min-width: 36px;">1.0×</span>
+            <button class="btn-tiny" id="recenterBtn" title="Re-center" style="flex-shrink:0;">⊙ Center</button>
+          </div>
           <input type="file" id="imageUpload" accept="image/*" class="hidden">
           <input type="file" id="videoUpload" accept="video/*" class="hidden">
 
@@ -1008,6 +1012,10 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.21</strong> — Jun 2026 (editor page)</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Editor layout</strong>: controls moved to a wide left column with the cover preview pinned on the right, so there is far less scrolling — even with the panels open. Overlay text box narrowed.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.20</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Hook box styling</strong>: set the hook box background colour and its corner rounding (layouts A &amp; B) in the Design panel.</li>
@@ -1112,7 +1120,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.20 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.21 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
