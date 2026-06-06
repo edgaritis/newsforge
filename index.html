@@ -564,6 +564,10 @@
   .proj-row .proj-title { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .proj-row .proj-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #999; }
   body.quick .qopt { display: none !important; }
+  .step.collapsible > div:first-child { position: relative; cursor: pointer; padding-right: 96px; }
+  .step.collapsible > div:first-child:hover .step-chevron { color: #0A0A0A; }
+  .step-chevron { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 11px; color: #D72638; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+  .step.collapsed > *:not(:first-child) { display: none !important; }
 </style>
 </head>
 <body>
@@ -580,7 +584,7 @@
     <!-- ============================== -->
     <!-- STEP 1: SOURCE -->
     <!-- ============================== -->
-    <div class="step">
+    <div class="step" id="step1">
       <div>
         <span class="step-number">1</span>
         <span class="step-title">Get the article</span>
@@ -994,6 +998,10 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.21</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Steps 1–3 auto-collapse</strong> after Process Response, so the page jumps to the results with no long scroll. Click any step header to expand it again.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.20</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Hook box styling</strong>: set the hook box background colour and its corner rounding (layouts A &amp; B) in the Design panel.</li>
@@ -1098,7 +1106,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.20 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.21 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -1523,10 +1531,40 @@ function parseResponse() {
   renderStep4();
   updateProjectNameTag();
   writeDraft();
+  setStepsCollapsed(true); // tuck away steps 1–3 so the page jumps to the results
   // jump straight to the results so there's no long scroll past the paste box
   requestAnimationFrame(() => {
     const nav = $('step4Nav') || $('step4');
     if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+// Steps 1–3 collapse to just their header once you're working in Step 4. Click a header to expand.
+function setupCollapsibleSteps() {
+  ['step1', 'step2', 'step3'].forEach(id => {
+    const step = $(id);
+    if (!step || step.dataset.collapsibleReady) return;
+    step.classList.add('collapsible');
+    const head = step.firstElementChild;
+    if (!head) return;
+    const chev = document.createElement('span');
+    chev.className = 'step-chevron';
+    chev.textContent = '▾ collapse';
+    head.appendChild(chev);
+    head.addEventListener('click', () => {
+      const collapsed = step.classList.toggle('collapsed');
+      chev.textContent = collapsed ? '▸ expand' : '▾ collapse';
+    });
+    step.dataset.collapsibleReady = '1';
+  });
+}
+function setStepsCollapsed(collapsed) {
+  ['step1', 'step2', 'step3'].forEach(id => {
+    const step = $(id);
+    if (!step || !step.classList.contains('collapsible')) return;
+    step.classList.toggle('collapsed', collapsed);
+    const chev = step.querySelector('.step-chevron');
+    if (chev) chev.textContent = collapsed ? '▸ expand' : '▾ collapse';
   });
 }
 
@@ -2817,6 +2855,7 @@ function newProject() {
   state.projectId = null;
   state.projectName = '';
   clearDraft();
+  setStepsCollapsed(false); // new article → show the input steps again
   updateProjectNameTag();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   showToast('New project');
@@ -2866,6 +2905,7 @@ async function loadProject(id) {
     const cover = await idbGet('covers', id);
     if (cover) { state.uploadedImageDataUrl = cover; state.coverCleared = false; renderComposite(); restored = true; }
   } catch (e) {}
+  setStepsCollapsed(true); // viewing a saved post → keep input steps tucked away
   requestAnimationFrame(() => { const n = $('step4Nav') || $('step4'); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   showToast(restored ? 'Opened: ' + p.name : 'Opened: ' + p.name + ' — re-add your photo/video');
 }
@@ -3227,6 +3267,7 @@ updateProjectNameTag();
 maybeOfferRestore();
 try { if (localStorage.getItem('newsforge_quick') === '1') setQuickMode(true); } catch (e) {}
 renderLibrary();
+setupCollapsibleSteps();
 </script>
 <script>
 // PWA: register the service worker for install + offline (no effect when opened as a local file)
