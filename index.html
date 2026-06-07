@@ -348,11 +348,11 @@
 
   .hook-option {
     display: flex;
-    gap: 14px;
-    padding: 16px 18px;
+    gap: 10px;
+    padding: 9px 12px;
     border: 1.5px solid #D5CFC1;
     background: #FFF;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     cursor: pointer;
     transition: all 0.15s;
     align-items: flex-start;
@@ -365,7 +365,7 @@
     box-shadow: 4px 4px 0 #D72638;
   }
   .hook-radio {
-    width: 18px; height: 18px; border-radius: 50%;
+    width: 15px; height: 15px; border-radius: 50%;
     border: 2px solid #0A0A0A;
     flex-shrink: 0;
     margin-top: 2px;
@@ -386,7 +386,7 @@
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: #888;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
   }
   .hook-text {
     font-family: 'Fraunces', serif;
@@ -442,6 +442,10 @@
     text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; color: #555;
   }
   .mode-btn.active { background: #0A0A0A; color: #FFF; }
+  .sum-tabs { display: inline-flex; flex-wrap: wrap; border: 1.5px solid #0A0A0A; margin-bottom: 10px; }
+  .sum-tab { background: #FFF; border: none; border-right: 1.5px solid #0A0A0A; padding: 6px 13px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; color: #555; }
+  .sum-tab:last-child { border-right: none; }
+  .sum-tab.active { background: #0A0A0A; color: #FFF; }
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.72);
     display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
@@ -915,6 +919,12 @@
         <div class="col-rest">
           <div class="qopt">
           <div class="section-label" id="jumpCaption" style="margin-top: 32px;">Summary (for the caption)</div>
+          <div class="sum-tabs" id="summaryTabs">
+            <button type="button" class="sum-tab active" data-sum="neutral">Neutral</button>
+            <button type="button" class="sum-tab" data-sum="dramatic">Dramatic</button>
+            <button type="button" class="sum-tab" data-sum="controversial">Controversial</button>
+            <button type="button" class="sum-tab" data-sum="casual">Casual</button>
+          </div>
           <div class="summary-box" id="summaryBox"></div>
           <div class="controls-row" style="margin-top: 10px;">
             <button class="btn-tiny" id="copySummaryBtn">📋 Copy Summary</button>
@@ -963,11 +973,13 @@
           <div class="section-label" style="margin-top: 32px;">Signature</div>
           <input class="sig-input" id="signatureInput" value="~MS" placeholder="~Your initials">
 
-          <div id="verifyPanel" class="hidden" style="margin-top: 28px; border: 1.5px solid #D72638; background: #FFF; padding: 14px 16px;">
-            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#D72638; margin-bottom:8px;">⚠ Verify before posting</div>
-            <div class="note" style="margin-bottom:10px;">Tick each fact once you've confirmed it against the source. Posting fast is when mistakes slip out.</div>
-            <div id="verifyList"></div>
-          </div>
+          <details id="verifyPanel" class="hidden" open style="margin-top: 28px; border: 1.5px solid #D72638; background: #FFF;">
+            <summary style="cursor:pointer; padding:12px 16px; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#D72638;">⚠ Verify before posting</summary>
+            <div style="padding: 0 16px 14px;">
+              <div class="note" style="margin-bottom:10px;">Tick each fact once you've confirmed it against the source. Posting fast is when mistakes slip out.</div>
+              <div id="verifyList"></div>
+            </div>
+          </details>
 
           <div class="section-label" style="margin-top: 28px;">Caption preview</div>
           <div id="captionMeta" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#888; margin-bottom:6px;"></div>
@@ -998,6 +1010,13 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.22</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Compact hooks</strong>: smaller hook cards and font so the list takes less space.</li>
+          <li><strong>Eight hooks</strong>: added a second dramatic angle (regenerate to get it).</li>
+          <li><strong>Summary in tabs</strong>: Neutral / Dramatic / Controversial / Casual versions of the caption summary, switchable in one spot so the page stays short. The caption uses the tab you pick.</li>
+          <li><strong>Verify checklist is collapsible</strong>.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.21</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Steps 1–3 auto-collapse</strong> after Process Response, so the page jumps to the results with no long scroll. Click any step header to expand it again.</li>
@@ -1106,7 +1125,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.21 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.22 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -1175,6 +1194,7 @@ const HOOK_LABELS = [
   { tag: 'CONTROVERSIAL', desc: 'provocative, invites debate' },
   { tag: 'CASUAL / DAILY', desc: 'everyday spoken, friendly' },
   { tag: 'CASUAL / SLANG', desc: 'gaul, very informal' },
+  { tag: 'DRAMATIC / BOLD', desc: 'a second dramatic angle — punchy, alarming' },
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -1418,7 +1438,10 @@ ${article.content}
 Output ONLY a JSON object with EXACTLY this structure. No preamble, no markdown fences, no explanation before or after — just the JSON:
 
 {
-  "summary": "1-2 short paragraphs summarizing the key facts and stakes in an engaging but accurate voice. CRITICAL: Use only facts present in the source. Do NOT invent numbers, quotes, names, dates, or details. If a number is in the source, use it verbatim.",
+  "summary": "NEUTRAL caption summary: 1-2 short paragraphs summarizing the key facts and stakes in an engaging but accurate voice. CRITICAL: Use only facts present in the source. Do NOT invent numbers, quotes, names, dates, or details. If a number is in the source, use it verbatim.",
+  "summary_dramatic": "DRAMATIC version of the caption summary: the SAME facts retold with emotional, scroll-stopping energy. Same length (1-2 short paragraphs). Same strict rule — only facts from the source, nothing invented.",
+  "summary_controversial": "CONTROVERSIAL version of the caption summary: the SAME facts framed to provoke debate, through framing and pointed questions only — never invented accusations. Same length. Only facts from the source.",
+  "summary_casual": "CASUAL version of the caption summary: the SAME facts told in relaxed everyday language, like telling a friend. Same length. Only facts from the source.",
   "hooks": [
     "DRAMATIC hook: emotionally charged, 8-14 words, scroll-stopper energy.",
     "NEUTRAL hook: factual and clear, 8-14 words, straight headline style.",
@@ -1426,7 +1449,8 @@ Output ONLY a JSON object with EXACTLY this structure. No preamble, no markdown 
     "VIRAL hook: high-energy and urgent, feels like trending breaking news, 8-14 words. May open with an attention word (e.g. Viral, Heboh, Breaking).",
     "CONTROVERSIAL hook: takes a provocative angle or poses a pointed question that invites debate, 8-14 words. Provoke through FRAMING and QUESTIONS only — do NOT state any fact that is not in the article, and do NOT fabricate accusations.",
     "CASUAL hook: everyday conversational language, like telling a friend the news, 8-14 words. Relaxed and natural, NOT formal or journalistic.",
-    "SLANG hook: very informal social-media slang (bahasa gaul if Indonesian, casual internet speak if English). 8-14 words, still readable."
+    "SLANG hook: very informal social-media slang (bahasa gaul if Indonesian, casual internet speak if English). 8-14 words, still readable.",
+    "SECOND DRAMATIC hook: a DIFFERENT dramatic angle from the first dramatic hook — punchy, bold, and alarming, 8-14 words. Must use clearly different wording and emphasis than the first dramatic hook."
   ],
   "discussion_question": "One short question to place at the END of the Facebook caption that invites readers to comment. Natural, not engagement-bait. Example shape: 'Menurut kalian, ...?'",
   "carousel_slides": [
@@ -1517,14 +1541,15 @@ function parseResponse() {
     return;
   }
 
-  if (!parsed.summary || !Array.isArray(parsed.hooks) || parsed.hooks.length !== 7 || !Array.isArray(parsed.hashtags)) {
+  if (!parsed.summary || !Array.isArray(parsed.hooks) || parsed.hooks.length !== 8 || !Array.isArray(parsed.hashtags)) {
     showError($('parseErrorContainer'),
-      'JSON found but missing required fields. Expected: summary, hooks (7 items), hashtags (array). If hooks count is wrong, ask Claude to redo with exactly 7 hooks.');
+      'JSON found but missing required fields. Expected: summary, hooks (8 items), hashtags (array). If hooks count is wrong, ask Claude to redo with exactly 8 hooks.');
     return;
   }
 
   state.generated = parsed;
   state.selectedHookIdx = 1;
+  state.summaryVariant = 'neutral';
   state.editableHooks = [state.article.title, ...parsed.hooks];
   state.coverOffsetX = 0; state.coverOffsetY = 0; state.coverImgEl = null; state.coverCleared = false;
   state.projectId = null; state.projectName = '';
@@ -1586,7 +1611,7 @@ function renderStep4() {
       <div class="hook-radio" data-select="${i}"></div>
       <div class="hook-content">
         <div class="hook-tag">${HOOK_LABELS[i].tag} · ${HOOK_LABELS[i].desc}</div>
-        <textarea class="input hook-edit" data-hookedit="${i}" rows="2" style="font-family:'Fraunces',serif; font-weight:600; font-size:16px; min-height:52px; margin-top:4px;">${escapeHtml(h)}</textarea>
+        <textarea class="input hook-edit" data-hookedit="${i}" rows="2" style="font-family:'Fraunces',serif; font-weight:600; font-size:13.5px; line-height:1.35; min-height:30px; margin-top:2px;">${escapeHtml(h)}</textarea>
       </div>
       <button class="btn-tiny hook-copy" data-copyhook="${i}" title="Copy this hook" style="flex-shrink:0; align-self:center;">📋</button>
     </div>
@@ -1630,7 +1655,8 @@ function renderStep4() {
     });
   });
 
-  $('summaryBox').textContent = state.generated.summary;
+  if (!state.summaryVariant) state.summaryVariant = 'neutral';
+  renderSummary();
   // Optional rephrased post
   const rp = state.generated.rephrased_post;
   if (rp && String(rp).trim()) {
@@ -2449,6 +2475,18 @@ function loadVideoUpload(e) {
   e.target.value = '';
 }
 
+// The four caption-summary variants live behind tabs; the caption uses the active one.
+function currentSummary() {
+  const g = state.generated || {};
+  const map = { neutral: g.summary, dramatic: g.summary_dramatic, controversial: g.summary_controversial, casual: g.summary_casual };
+  const v = map[state.summaryVariant];
+  return (v && String(v).trim()) ? String(v).trim() : (g.summary || '');
+}
+function renderSummary() {
+  if ($('summaryBox')) $('summaryBox').textContent = currentSummary();
+  document.querySelectorAll('#summaryTabs .sum-tab').forEach(t => t.classList.toggle('active', t.dataset.sum === (state.summaryVariant || 'neutral')));
+}
+
 function buildCaption() {
   if (!state.generated || !state.article) return '';
   const sig = $('signatureInput').value.trim() || '~MS';
@@ -2464,8 +2502,8 @@ function buildCaption() {
   const sourceLine = state.article.url && state.article.url !== 'manual entry'
     ? `\n\nSumber: ${state.article.url}`
     : '';
-  // Hook FIRST (before the fold) → summary → question (drives comments) → signature + tags → source
-  return `${hook}\n\n${state.generated.summary}${question}\n\n${sig} ${tags}${sourceLine}`;
+  // Hook FIRST (before the fold) → summary (selected variant) → question → signature + tags → source
+  return `${hook}\n\n${currentSummary()}${question}\n\n${sig} ${tags}${sourceLine}`;
 }
 
 // Caption preview with character count + Facebook "See more" fold marker (~125 chars)
@@ -2811,6 +2849,7 @@ function currentProjectData() {
     article: state.article,
     generated: state.generated,
     selectedHookIdx: state.selectedHookIdx,
+    summaryVariant: state.summaryVariant || 'neutral',
     editableHooks: state.editableHooks,
     signature: ($('signatureInput') && $('signatureInput').value) || '',
     coverNote: state.coverNote || '',
@@ -2866,6 +2905,7 @@ function applyProjectData(data) {
   state.article = data.article || null;
   state.generated = data.generated || null;
   state.selectedHookIdx = data.selectedHookIdx != null ? data.selectedHookIdx : 1;
+  state.summaryVariant = data.summaryVariant || 'neutral';
   state.editableHooks = data.editableHooks || null;
   state.coverNote = data.coverNote || '';
   state.coverLayout = data.coverLayout || 'A';
@@ -3071,12 +3111,21 @@ $('copyImagePromptBtn').addEventListener('click', copyImagePrompt);
 $('downloadAllSlidesBtn').addEventListener('click', downloadAllSlides);
 $('copyReelBtn').addEventListener('click', copyReel);
 $('copySummaryBtn').addEventListener('click', () => {
-  if (state.generated && state.generated.summary) {
-    navigator.clipboard.writeText(state.generated.summary).then(
+  const s = currentSummary();
+  if (s) {
+    navigator.clipboard.writeText(s).then(
       () => showToast('Summary copied'),
       () => showToast('Copy failed')
     );
   }
+});
+// Summary variant tabs — switch the caption summary without lengthening the page
+document.querySelectorAll('#summaryTabs .sum-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    state.summaryVariant = tab.dataset.sum;
+    renderSummary();
+    renderCaptionPreview();
+  });
 });
 $('copyHashtagsBtn').addEventListener('click', () => {
   if (state.generated && Array.isArray(state.generated.hashtags)) {
