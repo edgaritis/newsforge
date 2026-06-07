@@ -902,10 +902,6 @@
           <div class="controls-row hidden" id="videoActions">
             <button class="btn-secondary" id="videoReplaceBtn">↑ Upload / Replace video</button>
             <button class="btn-secondary" id="clearCoverBtnVid">✕ Clear</button>
-            <select id="exportQuality" title="Export quality" style="font-family:'JetBrains Mono',monospace; font-size:11px; padding:8px 10px; border:1.5px solid #0A0A0A; background:#FFF; cursor:pointer;">
-              <option value="standard">Sharp · bigger file</option>
-              <option value="smaller">Smaller file</option>
-            </select>
             <button class="btn" id="exportVideoBtn">⏺ Export video</button>
           </div>
 
@@ -1016,6 +1012,10 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.25</strong> — Jun 2026 (editor page)</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Video export reverted to the original reliable method</strong> — removed the bitrate/quality option that was freezing the video while audio kept playing.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.24</strong> — Jun 2026 (editor page)</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Fixed video export freezing</strong> (video stalled while audio kept playing). It records the live preview canvas again; the quality option now reduces file size via bitrate, both at full 1080.</li>
@@ -1133,7 +1133,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.24 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.25 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -2354,8 +2354,6 @@ async function exportVideo() {
   $('vidPlayBtn').textContent = '▶ Play';
 
   const mime = pickExportMime();
-  const quality = ($('exportQuality') && $('exportQuality').value) || 'standard';
-  const targetBitrate = quality === 'smaller' ? 2500000 : 4500000;
   const prevMuted = v.muted;
   v.muted = false; // capture audio (plays aloud during export)
   const useRVFC = typeof v.requestVideoFrameCallback === 'function';
@@ -2369,8 +2367,8 @@ async function exportVideo() {
 
   const chunks = [];
   let rec;
-  try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: targetBitrate } : { videoBitsPerSecond: targetBitrate }); }
-  catch (e) { try { rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream); } catch (e2) { rec = new MediaRecorder(stream); } }
+  try { rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream); }
+  catch (e) { rec = new MediaRecorder(stream); }
   state.recorder = rec;
   rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
   rec.onstop = () => {
