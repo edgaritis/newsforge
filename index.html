@@ -921,7 +921,7 @@
           </div>
 
           <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.1em; text-transform: uppercase;">
-            1080 × 1440 · 3:4 portrait
+            1080 × 1350 · 4:5 portrait
           </div>
         </div>
 
@@ -1022,6 +1022,14 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.27</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Text safe zone</strong>: 108px side margins on all layouts; the bottom box (Layout A) now matches the supplied guide (top 55.6%, bottom 82.4%).</li>
+        </ul>
+        <p style="margin: 14px 0 4px;"><strong>v1.26</strong> — Jun 2026</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Cover ratio changed to 4:5</strong> (1080×1350) for Instagram/Facebook portrait. Preview, PNG, and video all use the new ratio.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.25</strong> — Jun 2026</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Video export reverted to the original reliable method</strong> — removed the bitrate/quality option that was freezing the video while audio kept playing.</li>
@@ -1153,7 +1161,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.25 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.27 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -1894,7 +1902,7 @@ function renderComposite() {
 function clampCoverOffset() {
   const src = state.coverMode === 'video' ? state.videoEl : state.coverImgEl;
   if (!src) return;
-  const W = 1080, H = 1440;
+  const W = 1080, H = 1350;
   const rect = pictureRect(state.coverLayout || 'A', W, H);
   const scale = parseFloat(($('imageScale') && $('imageScale').value) || 1);
   const iw = src.naturalWidth || src.videoWidth || 1;
@@ -1923,7 +1931,7 @@ function drawBlueBackground(ctx, W, H) {
 
 // Big centered white text on the blue frame — used for carousel slides 2-5
 function drawTextSlide(canvas, text, slideNum) {
-  const W = 1080, H = 1440;
+  const W = 1080, H = 1350;
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -2044,7 +2052,7 @@ function drawWatermark(ctx, wm, W, H) {
 }
 
 function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY, design) {
-  const W = 1080, H = 1440; canvas.width = W; canvas.height = H;
+  const W = 1080, H = 1350; canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, W, H);
   const d = design || { layout: 'A', colors: DEFAULT_COLORS, watermark: null, note: '' };
   const col = d.colors || DEFAULT_COLORS;
@@ -2063,9 +2071,9 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY, d
       drawColorZone(ctx, 0, 0, W, H, col.primary, col.accent, true); ctx.restore();
     }
     drawPictureInRect(ctx, img, rect, scale, ox, oy);
-    const bx = 44, bw = W - 88;
-    const bt = L === 'A' ? Math.round(H * 0.635) : Math.round(H * 0.065);
-    const bb = L === 'A' ? Math.round(H * 0.935) : Math.round(H * 0.365);
+    const bx = 108, bw = W - 216;
+    const bt = L === 'A' ? Math.round(H * 0.5556) : Math.round(H * 0.065);
+    const bb = L === 'A' ? Math.round(H * 0.8237) : Math.round(H * 0.365);
     drawWhiteBox(ctx, bx, bt, bw, bb - bt, d.boxColor, d.boxRadius);
     const r = fitHook(ctx, hookText, bw - 112, bb - bt, 58, '900');
     ctx.fillStyle = col.text || '#0a0a0a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -2077,11 +2085,11 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY, d
     const g = ctx.createLinearGradient(0, barTop, 0, H);
     g.addColorStop(0, rgba(col.primary, 0)); g.addColorStop(0.55, rgba(col.primary, 0.85)); g.addColorStop(1, rgba(col.primary, 0.98));
     ctx.fillStyle = g; ctx.fillRect(0, barTop, W, H - barTop);
-    ctx.fillStyle = col.accent; ctx.fillRect(60, Math.round(H * 0.66), 90, 8);
+    ctx.fillStyle = col.accent; ctx.fillRect(108, Math.round(H * 0.66), 90, 8);
     const tc = isDark(col.text) ? '#ffffff' : col.text;
-    const r = fitHook(ctx, hookText, W - 120, H * 0.26, 64, '800');
+    const r = fitHook(ctx, hookText, W - 216, H * 0.26, 64, '800');
     ctx.fillStyle = tc; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-    r.lines.forEach((l, i) => ctx.fillText(l, 60, H - 70 - (r.lines.length - 1 - i) * r.lh));
+    r.lines.forEach((l, i) => ctx.fillText(l, 108, H - 70 - (r.lines.length - 1 - i) * r.lh));
   } else if (L === 'D') {
     drawPictureInRect(ctx, img, rect, scale, ox, oy);
     const g = ctx.createLinearGradient(0, 0, 0, H);
@@ -2090,7 +2098,7 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY, d
     ctx.fillStyle = col.accent; ctx.fillRect(W / 2 - 50, Math.round(H * 0.34), 100, 8);
     const tc = isDark(col.text) ? '#ffffff' : col.text;
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 18;
-    const r = fitHook(ctx, hookText, W - 150, H * 0.34, 76, '900');
+    const r = fitHook(ctx, hookText, W - 216, H * 0.34, 76, '900');
     ctx.fillStyle = tc; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const cy = H * 0.57, sy = cy - ((r.lines.length - 1) * r.lh) / 2;
     r.lines.forEach((l, i) => ctx.fillText(l, W / 2, sy + i * r.lh));
