@@ -817,8 +817,11 @@
               </div>
 
               <div class="input-label" style="margin-top: 16px;">Colours</div>
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:8px; cursor:pointer;">
+                <input type="checkbox" id="transparentZone" checked style="width:16px; height:16px; accent-color:#D72638;"> Transparent — image fills the whole frame
+              </label>
               <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
-                <input type="color" id="colPrimary" value="#0d52b0" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Primary (zone / bar)
+                <input type="color" id="colPrimary" value="#0d52b0" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Primary (zone / bar — when Transparent is off)
               </div>
               <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
                 <input type="color" id="colAccent" value="#4ec6e2" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Accent (glow / line)
@@ -1012,6 +1015,11 @@
     <details style="margin-top: 28px; border: 1.5px solid #D5CFC1; background: #FFF;">
       <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ What's new / version history</summary>
       <div style="padding: 4px 22px 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.65; color: #333;">
+        <p style="margin: 14px 0 4px;"><strong>v1.28</strong> — Jun 2026 (editor page)</p>
+        <ul style="margin: 0 0 14px; padding-left: 20px;">
+          <li><strong>Transparent zone</strong> (on by default): the image fills the whole frame with the hook box floating on it. Turn it off (or pick a Primary colour) to get the solid colour zone back.</li>
+          <li><strong>Lower-third (C) safe zone</strong>: text now sits above the bottom edge inside the safe margin instead of hugging it.</li>
+        </ul>
         <p style="margin: 14px 0 4px;"><strong>v1.27</strong> — Jun 2026 (editor page)</p>
         <ul style="margin: 0 0 14px; padding-left: 20px;">
           <li><strong>Text safe zone</strong>: 108px side margins on all layouts; the bottom box (Layout A) now matches the supplied guide (top 55.6%, bottom 82.4%).</li>
@@ -1141,7 +1149,7 @@
     </details>
 
     <div class="footer-note">
-      NewsForge v1.27 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
+      NewsForge v1.28 · Manual mode · Uses claude.ai chat (no API key) · Single file, no server, no tracking
     </div>
   </div>
 
@@ -1846,7 +1854,7 @@ function clampCoverOffset() {
   const src = state.coverMode === 'video' ? state.videoEl : state.coverImgEl;
   if (!src) return;
   const W = 1080, H = 1350;
-  const rect = pictureRect(state.coverLayout || 'A', W, H);
+  const rect = pictureRect(state.coverLayout || 'A', W, H, state.transparentZone !== false);
   const scale = parseFloat(($('imageScale') && $('imageScale').value) || 1);
   const iw = src.naturalWidth || src.videoWidth || 1;
   const ih = src.naturalHeight || src.videoHeight || 1;
@@ -1912,7 +1920,8 @@ function coverDesign() {
     watermark: state.watermark || null,
     note: (state.coverNote || '').trim(),
     boxColor: (state.colors && state.colors.box) || '#ffffff',
-    boxRadius: (state.boxRadius != null ? state.boxRadius : 8)
+    boxRadius: (state.boxRadius != null ? state.boxRadius : 8),
+    transparent: state.transparentZone !== false
   };
 }
 
@@ -1922,7 +1931,8 @@ function shadeHex(hex, p) { const c = hexToRgb(hex).map(v => Math.max(0, Math.mi
 function isDark(hex) { return String(hex).toLowerCase() === '#0a0a0a'; }
 
 // Picture region per layout (3:4 canvas)
-function pictureRect(layout, W, H) {
+function pictureRect(layout, W, H, fullBleed) {
+  if (fullBleed && (layout === 'A' || layout === 'B')) return { x: 0, y: 0, w: W, h: H };
   if (layout === 'A') return { x: 0, y: 0, w: W, h: Math.round(H * 0.756) };
   if (layout === 'B') return { x: 0, y: Math.round(H * 0.244), w: W, h: H - Math.round(H * 0.244) };
   return { x: 0, y: 0, w: W, h: H }; // C, D full-bleed
@@ -2002,16 +2012,18 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY, d
   const L = d.layout || 'A';
   const scale = scaleOverride != null ? scaleOverride : parseFloat(($('imageScale') && $('imageScale').value) || 1);
   const ox = offsetX || 0, oy = offsetY || 0;
-  const rect = pictureRect(L, W, H);
+  const rect = pictureRect(L, W, H, d.transparent);
 
   if (L === 'A' || L === 'B') {
-    if (L === 'A') {
-      ctx.save(); ctx.beginPath(); ctx.rect(0, rect.h, W, H - rect.h); ctx.clip();
-      drawColorZone(ctx, 0, 0, W, H, col.primary, col.accent, false); ctx.restore();
-    } else {
-      const bz = Math.round(H * 0.244);
-      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, bz); ctx.clip();
-      drawColorZone(ctx, 0, 0, W, H, col.primary, col.accent, true); ctx.restore();
+    if (!d.transparent) {
+      if (L === 'A') {
+        ctx.save(); ctx.beginPath(); ctx.rect(0, rect.h, W, H - rect.h); ctx.clip();
+        drawColorZone(ctx, 0, 0, W, H, col.primary, col.accent, false); ctx.restore();
+      } else {
+        const bz = Math.round(H * 0.244);
+        ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, bz); ctx.clip();
+        drawColorZone(ctx, 0, 0, W, H, col.primary, col.accent, true); ctx.restore();
+      }
     }
     drawPictureInRect(ctx, img, rect, scale, ox, oy);
     const bx = 108, bw = W - 216;
@@ -2024,15 +2036,17 @@ function drawComposite(canvas, img, hookText, scaleOverride, offsetX, offsetY, d
     r.lines.forEach((l, i) => ctx.fillText(l, W / 2, sy + i * r.lh));
   } else if (L === 'C') {
     drawPictureInRect(ctx, img, rect, scale, ox, oy);
-    const barTop = Math.round(H * 0.45);
+    const pc = d.transparent ? '#000000' : col.primary;
+    const barTop = Math.round(H * 0.42);
     const g = ctx.createLinearGradient(0, barTop, 0, H);
-    g.addColorStop(0, rgba(col.primary, 0)); g.addColorStop(0.55, rgba(col.primary, 0.85)); g.addColorStop(1, rgba(col.primary, 0.98));
+    g.addColorStop(0, rgba(pc, 0)); g.addColorStop(0.55, rgba(pc, 0.85)); g.addColorStop(1, rgba(pc, 0.98));
     ctx.fillStyle = g; ctx.fillRect(0, barTop, W, H - barTop);
-    ctx.fillStyle = col.accent; ctx.fillRect(108, Math.round(H * 0.66), 90, 8);
     const tc = isDark(col.text) ? '#ffffff' : col.text;
     const r = fitHook(ctx, hookText, W - 216, H * 0.26, 64, '800');
+    const textBottom = H - 238;
+    ctx.fillStyle = col.accent; ctx.fillRect(108, Math.round(textBottom - r.lines.length * r.lh - 34), 90, 8);
     ctx.fillStyle = tc; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-    r.lines.forEach((l, i) => ctx.fillText(l, 108, H - 70 - (r.lines.length - 1 - i) * r.lh));
+    r.lines.forEach((l, i) => ctx.fillText(l, 108, textBottom - (r.lines.length - 1 - i) * r.lh));
   } else if (L === 'D') {
     drawPictureInRect(ctx, img, rect, scale, ox, oy);
     const g = ctx.createLinearGradient(0, 0, 0, H);
@@ -2642,6 +2656,8 @@ function resetForm() {
   if ($('trimVideo')) { $('trimVideo').removeAttribute('src'); $('trimVideo').load && $('trimVideo').load(); }
   state.coverLayout = 'A';
   state.colors = { primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a', box: '#ffffff' };
+  state.transparentZone = true;
+  if ($('transparentZone')) $('transparentZone').checked = true;
   state.boxRadius = 8;
   state.watermark = { text: '', logoImg: null, pos: 'br', opacity: 75, size: 28 };
   if ($('coverNote')) $('coverNote').value = '';
@@ -2825,6 +2841,7 @@ function currentProjectData() {
     signature: ($('signatureInput') && $('signatureInput').value) || '',
     coverNote: state.coverNote || '',
     coverLayout: state.coverLayout,
+    transparentZone: state.transparentZone,
     colors: Object.assign({}, state.colors),
     boxRadius: state.boxRadius,
     watermark: { text: state.watermark.text || '', pos: state.watermark.pos, opacity: state.watermark.opacity, size: state.watermark.size },
@@ -2879,6 +2896,8 @@ function applyProjectData(data) {
   state.coverNote = data.coverNote || '';
   state.coverLayout = data.coverLayout || 'A';
   state.colors = Object.assign({ primary: '#0d52b0', accent: '#4ec6e2', text: '#0a0a0a', box: '#ffffff' }, data.colors || {});
+  state.transparentZone = (data.transparentZone != null ? data.transparentZone : true);
+  if ($('transparentZone')) $('transparentZone').checked = state.transparentZone;
   state.boxRadius = (data.boxRadius != null ? data.boxRadius : 8);
   state.watermark = Object.assign({ text: '', logoImg: null, pos: 'br', opacity: 75, size: 28 }, data.watermark || {});
   state.uploadedImageDataUrl = null; state.coverImgEl = null; state.coverCleared = false;
@@ -3202,16 +3221,18 @@ $('layoutPicker').addEventListener('click', (e) => {
   clampCoverOffset();
   redrawCover();
 });
-$('colPrimary').addEventListener('input', () => { state.colors.primary = $('colPrimary').value; redrawCover(); });
+$('colPrimary').addEventListener('input', () => { state.colors.primary = $('colPrimary').value; state.transparentZone = false; if ($('transparentZone')) $('transparentZone').checked = false; redrawCover(); });
 $('colAccent').addEventListener('input', () => { state.colors.accent = $('colAccent').value; redrawCover(); });
 $('colText').addEventListener('input', () => { state.colors.text = $('colText').value; redrawCover(); });
 $('colBox').addEventListener('input', () => { state.colors.box = $('colBox').value; redrawCover(); });
+$('transparentZone').addEventListener('change', () => { state.transparentZone = $('transparentZone').checked; redrawCover(); });
 $('boxRadius').addEventListener('input', () => { state.boxRadius = parseInt($('boxRadius').value, 10); $('boxRadiusValue').textContent = state.boxRadius + ' px'; redrawCover(); });
 $('colorPresets').addEventListener('click', (e) => {
   const c = e.target.closest('.cp'); if (!c) return;
   const [p, a, t] = c.dataset.p.split(',');
-  state.colors = { primary: p, accent: a, text: t };
+  state.colors = { primary: p, accent: a, text: t, box: (state.colors && state.colors.box) || '#ffffff' };
   $('colPrimary').value = p; $('colAccent').value = a; $('colText').value = t;
+  state.transparentZone = false; if ($('transparentZone')) $('transparentZone').checked = false;
   redrawCover();
 });
 $('wmText').addEventListener('input', () => { state.watermark.text = $('wmText').value; state.watermark.logoImg = null; redrawCover(); });
