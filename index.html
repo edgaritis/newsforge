@@ -301,6 +301,23 @@
   }
   .mode-btn.active{ background:var(--text); color:var(--bg); }
 
+  /* Cover column helpers */
+  .mono-tag{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); font-weight:600; white-space:nowrap; }
+  .cover-tip{ margin-top:8px; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); }
+  .layout-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .lay{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:7px 4px 5px; background:var(--surface-2); border:1px solid var(--divider);
+    cursor:pointer; color:var(--muted);
+    font-family:var(--font); font-weight:600; font-size:9px; letter-spacing:0.02em; text-transform:uppercase;
+    transition:border-color .12s,color .12s,background .12s;
+  }
+  .lay svg{ width:24px; height:30px; display:block; }
+  .lay:hover{ border-color:var(--divider-strong); color:var(--text); }
+  .lay.active{ border-color:var(--accent); color:var(--accent); background:var(--accent-100); box-shadow:inset 0 0 0 1px var(--accent); }
+  details.sub{ border:none; background:transparent; margin:8px 0 0; }
+  details.sub > summary{ padding:5px 0; color:var(--muted); font-size:10px; }
+
   /* Modal / dialog */
   .modal-overlay{
     position:fixed; inset:0;
@@ -655,75 +672,72 @@
             <canvas id="composeCanvas"></canvas>
           </div>
           <div id="canvasWarning"></div>
-          <div id="coverTip" style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">
-            Drag &amp; drop an image here to upload · after zooming, drag to reposition
-          </div>
+          <div id="coverTip" class="cover-tip">Drag &amp; drop an image here · after zooming, drag to reposition</div>
 
           <div id="videoControls" class="hidden" style="margin-top: 12px;">
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
               <button class="btn-tiny" id="vidPlayBtn" type="button">▶ Play</button>
-              <input type="range" id="vidScrub" min="0" max="1000" value="0" style="flex:1; min-width:120px; cursor:pointer; accent-color:#D72638;">
-              <span id="vidTime" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#0A0A0A; min-width:88px; text-align:right;">0:00 / 0:00</span>
+              <input type="range" id="vidScrub" min="0" max="1000" value="0" style="flex:1; min-width:120px; cursor:pointer; accent-color:var(--accent);">
+              <span id="vidTime" class="mono-tag" style="min-width:88px; text-align:right;">0:00 / 0:00</span>
               <button class="btn-tiny" id="vidMuteBtn" type="button" title="Preview audio (export always includes audio)">🔇 Muted</button>
               <button class="btn-tiny" id="editTrimBtn" type="button">✂ Edit trim</button>
             </div>
           </div>
 
-          <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <label style="font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #555; white-space: nowrap;">Zoom</label>
-            <input type="range" id="imageScale" min="1" max="2" step="0.05" value="1" style="flex: 1; cursor: pointer; accent-color: #D72638;">
-            <span id="imageScaleValue" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #0A0A0A; min-width: 36px;">1.0×</span>
+          <div class="input-label" style="margin-top:14px;">Layout</div>
+          <div id="layoutPicker" class="layout-grid">
+            <button type="button" class="lay active" data-layout="A" title="Straddle — box over the seam"><svg viewBox="0 0 40 50"><rect x="1" y="1" width="38" height="48" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="4" width="32" height="24" fill="currentColor" opacity="0.2"/><rect x="6" y="20" width="28" height="13" fill="currentColor" opacity="0.65"/></svg><span>Straddle</span></button>
+            <button type="button" class="lay" data-layout="B" title="Top box"><svg viewBox="0 0 40 50"><rect x="1" y="1" width="38" height="48" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="6" y="5" width="28" height="11" fill="currentColor" opacity="0.65"/><rect x="4" y="20" width="32" height="26" fill="currentColor" opacity="0.2"/></svg><span>Top box</span></button>
+            <button type="button" class="lay" data-layout="C" title="Lower-third bar"><svg viewBox="0 0 40 50"><rect x="1" y="1" width="38" height="48" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="4" width="32" height="42" fill="currentColor" opacity="0.2"/><rect x="4" y="33" width="32" height="13" fill="currentColor" opacity="0.65"/></svg><span>Lower 3rd</span></button>
+            <button type="button" class="lay" data-layout="D" title="Text over image"><svg viewBox="0 0 40 50"><rect x="1" y="1" width="38" height="48" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="4" width="32" height="42" fill="currentColor" opacity="0.2"/><rect x="9" y="21" width="22" height="8" fill="currentColor" opacity="0.7"/></svg><span>Over</span></button>
+          </div>
+
+          <div style="margin-top: 12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <label class="mono-tag">Zoom</label>
+            <input type="range" id="imageScale" min="1" max="2" step="0.05" value="1" style="flex:1; cursor:pointer; accent-color:var(--accent);">
+            <span id="imageScaleValue" class="mono-tag" style="min-width:36px;">1.0×</span>
             <button class="btn-tiny" id="recenterBtn" title="Re-center" style="flex-shrink:0;">⊙ Center</button>
           </div>
-          <div class="field" style="margin-top: 14px;">
-            <label class="input-label">Note / disclaimer (optional — leave blank to remove)</label>
-            <input class="input" id="coverNote" type="text" placeholder="e.g. Image is illustration only, not the actual event" style="font-size: 14px;">
+
+          <input type="file" id="imageUpload" accept="image/*" class="hidden">
+          <input type="file" id="videoUpload" accept="video/*" class="hidden">
+
+          <div class="controls-row" id="imageActions" style="margin-top:14px;">
+            <button class="btn-secondary" id="imageReplaceBtn">↑ Upload / Replace</button>
+            <button class="btn-secondary" id="clearCoverBtn">✕ Clear</button>
+            <button class="btn" id="downloadBtn">↓ Download PNG</button>
+          </div>
+          <div class="controls-row hidden" id="videoActions" style="margin-top:14px;">
+            <button class="btn-secondary" id="videoReplaceBtn">↑ Upload / Replace video</button>
+            <button class="btn-secondary" id="clearCoverBtnVid">✕ Clear</button>
+            <button class="btn" id="exportVideoBtn">⏺ Export video</button>
           </div>
 
-          <details id="libraryPanel" style="margin-top: 14px; border: 1.5px solid #D5CFC1; background: #FFF;">
-            <summary style="cursor: pointer; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Image library (reusable photos)</summary>
-            <div style="padding: 6px 16px 16px;">
-              <div class="note" style="margin-bottom: 10px;">Save photos you reuse — logos, backgrounds, recurring topics. Stored on this browser only. Tap a saved photo to drop it into the cover.</div>
-              <button type="button" class="btn-secondary" id="addToLibraryBtn">+ Save current cover image</button>
-              <div id="libraryGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;"></div>
+          <div id="videoExportArea" class="hidden" style="margin-top:12px;">
+            <div id="videoFormatBadge" class="mono-tag"></div>
+            <div id="exportProgressWrap" class="hidden" style="margin-top:10px;">
+              <div style="background:var(--surface); height:8px; overflow:hidden; border:1px solid var(--divider);">
+                <div id="exportProgressBar" style="background:var(--accent); height:100%; width:0%;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                <span id="exportProgressText" class="mono-tag" style="text-transform:none; letter-spacing:0;">Recording…</span>
+                <button class="btn-tiny" id="exportCancelBtn" type="button">✕ Cancel</button>
+              </div>
             </div>
-          </details>
+            <div class="mono-tag" style="margin-top:8px; font-size:9px; line-height:1.6;">
+              Records in real time · keep this tab in front · audio included · max 60s
+            </div>
+          </div>
 
-          <div id="varietyNudge" class="hidden" style="margin-top: 14px; padding: 10px 14px; border: 1.5px solid #C8860B; background: #FFF8EC; color: #8a5a00; font-size: 13px; line-height: 1.45;"></div>
-
-          <details id="designPanel" class="qopt" style="margin-top: 14px; border: 1.5px solid #D5CFC1; background: #FFF;">
-            <summary style="cursor: pointer; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Design — layout, colours, watermark</summary>
-            <div style="padding: 6px 16px 18px;">
-              <div class="input-label" style="margin-top: 8px;">Layout</div>
-              <div class="row" id="layoutPicker" style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button type="button" class="btn-tiny lay active" data-layout="A">A · Straddle</button>
-                <button type="button" class="btn-tiny lay" data-layout="B">B · Top box</button>
-                <button type="button" class="btn-tiny lay" data-layout="C">C · Lower-third</button>
-                <button type="button" class="btn-tiny lay" data-layout="D">D · Over image</button>
-              </div>
-
-              <div class="input-label" style="margin-top: 16px;">Colours</div>
-              <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:8px; cursor:pointer;">
-                <input type="checkbox" id="transparentZone" checked style="width:16px; height:16px; accent-color:#D72638;"> Transparent — image fills the whole frame
+          <!-- Set-once styling lives behind one drawer -->
+          <details id="designPanel" class="qopt" style="margin-top:14px;">
+            <summary>Style — colours, watermark, note</summary>
+            <div style="padding: 6px 14px 16px;">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:12px; cursor:pointer;">
+                <input type="checkbox" id="transparentZone" checked style="width:16px; height:16px; accent-color:var(--accent);"> Transparent — image fills the whole frame
               </label>
-              <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
-                <input type="color" id="colPrimary" value="#0d52b0" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Primary (zone / bar — when Transparent is off)
-              </div>
-              <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
-                <input type="color" id="colAccent" value="#4ec6e2" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Accent (glow / line)
-              </div>
-              <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
-                <input type="color" id="colText" value="#0a0a0a" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Hook text
-              </div>
-              <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
-                <input type="color" id="colBox" value="#ffffff" style="width:40px; height:28px; padding:0; border:1px solid #ccc;"> Hook box (layouts A &amp; B)
-              </div>
-              <div class="input-label" style="margin-top: 12px;">Hook box corner rounding</div>
-              <div style="display:flex; align-items:center; gap:10px;">
-                <input type="range" id="boxRadius" min="0" max="90" value="8" style="flex:1;">
-                <span id="boxRadiusValue" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#555; min-width:42px; text-align:right;">8 px</span>
-              </div>
-              <div class="input-label" style="margin-top: 12px;">Presets</div>
+
+              <div class="input-label">Colour preset</div>
               <div class="row" id="colorPresets" style="display:flex; gap:8px;">
                 <span class="cp" data-p="#0d52b0,#4ec6e2,#0a0a0a" title="Blue" style="width:26px;height:26px;border-radius:50%;background:#0d52b0;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
                 <span class="cp" data-p="#c0392b,#f39c12,#ffffff" title="Red/amber" style="width:26px;height:26px;border-radius:50%;background:#c0392b;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
@@ -732,53 +746,63 @@
                 <span class="cp" data-p="#7d3c98,#d2b4de,#ffffff" title="Purple" style="width:26px;height:26px;border-radius:50%;background:#7d3c98;cursor:pointer;box-shadow:0 0 0 1px #ccc;"></span>
               </div>
 
-              <div class="input-label" style="margin-top: 16px;">Watermark (page handle)</div>
-              <input class="input" id="wmText" type="text" placeholder="@YourPage (leave blank for none)" style="font-size:14px;">
+              <details class="sub">
+                <summary>Custom colours &amp; corner rounding</summary>
+                <div style="padding-top:6px;">
+                  <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
+                    <input type="color" id="colPrimary" value="#0d52b0" style="width:38px; height:26px; padding:0; border:1px solid var(--divider);"> Primary (zone / bar)
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
+                    <input type="color" id="colAccent" value="#4ec6e2" style="width:38px; height:26px; padding:0; border:1px solid var(--divider);"> Accent (glow / line)
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px;">
+                    <input type="color" id="colText" value="#0a0a0a" style="width:38px; height:26px; padding:0; border:1px solid var(--divider);"> Hook text
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                    <input type="color" id="colBox" value="#ffffff" style="width:38px; height:26px; padding:0; border:1px solid var(--divider);"> Hook box (A &amp; B)
+                  </div>
+                  <div class="input-label" style="margin-top:10px;">Hook box corner rounding</div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="range" id="boxRadius" min="0" max="90" value="8" style="flex:1; accent-color:var(--accent);">
+                    <span id="boxRadiusValue" class="mono-tag" style="min-width:42px; text-align:right; text-transform:none; letter-spacing:0;">8 px</span>
+                  </div>
+                </div>
+              </details>
+
+              <div class="input-label" style="margin-top:14px;">Watermark (page handle)</div>
+              <input class="input" id="wmText" type="text" placeholder="@YourPage (leave blank for none)">
               <div class="row" id="wmPosPicker" style="display:flex; gap:6px; margin-top:8px;">
                 <button type="button" class="btn-tiny wmpos" data-pos="tl">Top L</button>
                 <button type="button" class="btn-tiny wmpos" data-pos="tr">Top R</button>
                 <button type="button" class="btn-tiny wmpos" data-pos="bl">Bot L</button>
                 <button type="button" class="btn-tiny wmpos active" data-pos="br">Bot R</button>
               </div>
-              <div style="margin-top:8px;"><span class="input-label">Opacity</span><input type="range" id="wmOpacity" min="0" max="100" value="75" style="width:100%; accent-color:#D72638;"></div>
-              <div style="margin-top:6px;"><span class="input-label">Size</span><input type="range" id="wmSize" min="16" max="54" value="28" style="width:100%; accent-color:#D72638;"></div>
-              <div style="margin-top:10px; font-size:12px; color:#666;">Optional logo image (replaces text): <input type="file" id="wmLogo" accept="image/*"></div>
+              <details class="sub">
+                <summary>Watermark size, opacity &amp; logo</summary>
+                <div style="padding-top:6px;">
+                  <span class="input-label">Opacity</span><input type="range" id="wmOpacity" min="0" max="100" value="75" style="width:100%; accent-color:var(--accent);">
+                  <span class="input-label" style="margin-top:6px;">Size</span><input type="range" id="wmSize" min="16" max="54" value="28" style="width:100%; accent-color:var(--accent);">
+                  <div style="margin-top:10px; font-size:12px; color:var(--muted);">Logo image (replaces text): <input type="file" id="wmLogo" accept="image/*"></div>
+                </div>
+              </details>
+
+              <div class="input-label" style="margin-top:14px;">Note / disclaimer (optional)</div>
+              <input class="input" id="coverNote" type="text" placeholder="e.g. Image is illustration only, not the actual event">
             </div>
           </details>
 
-          <input type="file" id="imageUpload" accept="image/*" class="hidden">
-          <input type="file" id="videoUpload" accept="video/*" class="hidden">
-
-          <div class="controls-row" id="imageActions">
-            <button class="btn-secondary" id="imageReplaceBtn">↑ Upload / Replace image</button>
-            <button class="btn-secondary" id="clearCoverBtn">✕ Clear</button>
-            <button class="btn" id="downloadBtn">↓ Download PNG</button>
-          </div>
-          <div class="controls-row hidden" id="videoActions">
-            <button class="btn-secondary" id="videoReplaceBtn">↑ Upload / Replace video</button>
-            <button class="btn-secondary" id="clearCoverBtnVid">✕ Clear</button>
-            <button class="btn" id="exportVideoBtn">⏺ Export video</button>
-          </div>
-
-          <div id="videoExportArea" class="hidden" style="margin-top:12px;">
-            <div id="videoFormatBadge" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#555;"></div>
-            <div id="exportProgressWrap" class="hidden" style="margin-top:10px;">
-              <div style="background:#ddd; height:10px; border-radius:5px; overflow:hidden;">
-                <div id="exportProgressBar" style="background:#D72638; height:100%; width:0%;"></div>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-                <span id="exportProgressText" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#0A0A0A;">Recording…</span>
-                <button class="btn-tiny" id="exportCancelBtn" type="button">✕ Cancel</button>
-              </div>
+          <details id="libraryPanel" style="margin-top:10px;">
+            <summary>Image library (reusable photos)</summary>
+            <div style="padding: 6px 14px 14px;">
+              <div class="note" style="margin-bottom: 10px;">Save photos you reuse — logos, backgrounds, recurring topics. Stored on this browser only. Tap a saved photo to drop it into the cover.</div>
+              <button type="button" class="btn-secondary" id="addToLibraryBtn">+ Save current cover image</button>
+              <div id="libraryGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;"></div>
             </div>
-            <div style="margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:9px; line-height:1.6; color:#999; letter-spacing:0.04em; text-transform:uppercase;">
-              Records in real time · keep this tab in front · audio plays &amp; is included · max 60s
-            </div>
-          </div>
+          </details>
 
-          <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.1em; text-transform: uppercase;">
-            1080 × 1350 · 4:5 portrait
-          </div>
+          <div id="varietyNudge" class="hidden" style="margin-top: 12px; padding: 10px 14px; border:1px solid #C8860B; background:#FFF8EC; color:#8a5a00; font-size:13px; line-height:1.45;"></div>
+
+          <div class="mono-tag" style="margin-top: 12px;">1080 × 1350 · 4:5 portrait</div>
         </div>
 
         <div class="col-rest">
@@ -1712,6 +1736,26 @@ function coverHookText() {
     : (state.selectedHookIdx === 0 ? state.article.title : state.generated.hooks[state.selectedHookIdx - 1]);
 }
 
+function loadCoverDefaults(){ try{ return JSON.parse(localStorage.getItem('newsforge_coverdefaults')||'null'); }catch(e){ return null; } }
+function saveCoverDefaults(){ try{ localStorage.setItem('newsforge_coverdefaults', JSON.stringify({ layout: state.coverLayout, colors: state.colors, transparent: state.transparentZone, boxRadius: state.boxRadius, wm: { pos: state.watermark && state.watermark.pos, opacity: state.watermark && state.watermark.opacity, size: state.watermark && state.watermark.size, text: state.watermark && state.watermark.text } })); }catch(e){} }
+function applyCoverDefaults(cd){
+  if(!cd) return;
+  if(cd.layout) state.coverLayout = cd.layout;
+  state.colors = Object.assign({ primary:'#0d52b0', accent:'#4ec6e2', text:'#0a0a0a', box:'#ffffff' }, cd.colors||{});
+  if(cd.transparent!=null) state.transparentZone = cd.transparent;
+  if(cd.boxRadius!=null) state.boxRadius = cd.boxRadius;
+  if(cd.wm) state.watermark = Object.assign({ text:'', logoImg:null, pos:'br', opacity:75, size:28 }, cd.wm);
+  if($('transparentZone')) $('transparentZone').checked = state.transparentZone;
+  if($('colPrimary')){ $('colPrimary').value = state.colors.primary; $('colAccent').value = state.colors.accent; $('colText').value = state.colors.text; }
+  if($('colBox')) $('colBox').value = state.colors.box || '#ffffff';
+  if($('boxRadius')){ $('boxRadius').value = state.boxRadius; if($('boxRadiusValue')) $('boxRadiusValue').textContent = state.boxRadius + ' px'; }
+  if($('wmText')) $('wmText').value = (state.watermark && state.watermark.text) || '';
+  if($('wmOpacity')) $('wmOpacity').value = state.watermark.opacity;
+  if($('wmSize')) $('wmSize').value = state.watermark.size;
+  document.querySelectorAll('#layoutPicker .lay').forEach(x => x.classList.toggle('active', x.dataset.layout === state.coverLayout));
+  document.querySelectorAll('#wmPosPicker .wmpos').forEach(x => x.classList.toggle('active', x.dataset.pos === (state.watermark && state.watermark.pos)));
+}
+
 // Lightweight redraw using the already-loaded image/video (no network reload) — for drag, zoom, note
 function redrawCover() {
   if (!state.generated || !state.article) return;
@@ -1724,6 +1768,7 @@ function redrawCover() {
     drawComposite(canvas, null, coverHookText(), null, 0, 0, coverDesign());
   }
   scheduleAutosave();
+  saveCoverDefaults();
   checkVariety();
 }
 
@@ -2612,6 +2657,7 @@ function resetForm() {
   if ($('wmLogo')) $('wmLogo').value = '';
   document.querySelectorAll('#layoutPicker .lay').forEach(x => x.classList.toggle('active', x.dataset.layout === 'A'));
   document.querySelectorAll('#wmPosPicker .wmpos').forEach(x => x.classList.toggle('active', x.dataset.pos === 'br'));
+  applyCoverDefaults(loadCoverDefaults());
   switchCoverMode('image');
   $('urlInput').value = '';
   $('manualTitle').value = '';
@@ -3264,6 +3310,7 @@ updateProjectNameTag();
 maybeOfferRestore();
 try { if (localStorage.getItem('newsforge_quick') === '1') setQuickMode(true); } catch (e) {}
 renderLibrary();
+applyCoverDefaults(loadCoverDefaults());
 setupCollapsibleSteps();
 try { setHooksView(localStorage.getItem('newsforge_hooksview') === 'list' ? 'list' : 'grid'); } catch (e) { setHooksView('grid'); }
 </script>
