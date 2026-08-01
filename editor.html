@@ -196,19 +196,18 @@
   @media (max-width:900px){ .grid{ grid-template-columns:1fr; gap:24px; } }
 
   .results-grid{
-    display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:28px;
-    align-items:start;
+    display:flex; gap:28px; align-items:flex-start;
   }
-  .results-grid > .col-top{ grid-column:1; grid-row:1; }
-  .results-grid > .col-rest{ grid-column:1; grid-row:2; margin-top:24px; }
-  .results-grid > .cover-col{
-    grid-column:2; grid-row:1/3;
-    position:sticky; top:12px;
-    align-self:start;
+  .left-col{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
+  .col-rest{ margin-top:24px; }
+  .cover-col{
+    width:380px; flex:0 0 380px;
+    position:sticky; top:12px; align-self:flex-start;
   }
   @media (max-width:900px){
     .results-grid{ display:block; }
-    .results-grid > .cover-col{ position:static; margin:20px 0; }
+    .left-col{ display:block; }
+    .cover-col{ width:auto; position:static; margin:20px 0; }
   }
 
   .section-label{
@@ -648,6 +647,7 @@
       </div>
 
       <div class="results-grid">
+        <div class="left-col">
         <div class="col-top" id="jumpHooks">
           <div class="genonly">
             <div class="section-label">Source headline</div>
@@ -733,6 +733,82 @@
           </details>
         </div>
 
+        <div class="col-rest">
+          <div class="pane-switcher" style="display:flex; gap:0; border-bottom:2px solid var(--rule); margin-bottom:14px; flex-wrap:wrap;">
+        <button type="button" class="tab active" data-pane="caption">Caption</button>
+        <button type="button" class="tab" data-pane="tags">Hashtags · Prompt</button>
+        <button type="button" class="tab qopt" data-pane="extras">Carousel · Reel</button>
+        <button type="button" class="tab qopt" data-pane="verify">Verify · Preview</button>
+      </div>
+      
+          <div class="pane" data-pane="caption">
+          <div class="qopt">
+          <div class="section-label" id="jumpCaption" style="margin-top: 32px;">Summary (for the caption)</div>
+          <div class="summary-box" id="summaryBox"></div>
+          <div class="controls-row" style="margin-top: 10px;">
+            <button class="btn-tiny" id="copySummaryBtn">📋 Copy Summary</button>
+          </div>
+
+          <div id="rephraseSection" class="hidden">
+            <div class="section-label" style="margin-top: 32px;">Rephrased post <span id="rephraseCount" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#888; letter-spacing:0.08em;"></span></div>
+            <div class="note" style="margin: 0 0 8px;">A full rewrite in your own words — post this instead of copying the original.</div>
+            <div id="rephraseBox" style="background:#FFF; border:1.5px solid #D5CFC1; padding:14px 16px; max-height:320px; overflow:auto; font-family:'Fraunces',serif; font-size:15px; line-height:1.65; white-space:pre-wrap;"></div>
+            <div class="controls-row" style="margin-top: 10px;">
+              <button class="btn-tiny" id="copyRephraseBtn">📋 Copy Rephrased Post</button>
+            </div>
+          </div>
+
+          <div class="section-label" style="margin-top: 32px;">Discussion question (drives comments)</div>
+          <div class="summary-box" id="discussionBox" style="font-style: italic;"></div>
+
+          </div><div class="pane" data-pane="tags" hidden>
+          <div class="section-label" style="margin-top: 32px;">Hashtags</div>
+          <div id="hashtagsBox"></div>
+          <button class="btn-tiny" id="copyHashtagsBtn" style="margin-top: 10px;">📋 Copy Hashtags</button>
+
+          <div class="section-label" style="margin-top: 32px;">Image prompt (for Nano Banana / Midjourney)</div>
+          <textarea class="input mono" id="imagePromptBox" readonly style="min-height: 120px;"></textarea>
+          <div class="controls-row" style="margin-top: 12px;">
+            <button class="btn-secondary" id="copyImagePromptBtn">📋 Copy Image Prompt</button>
+          </div>
+
+          </div></div><div class="pane" data-pane="extras" hidden>
+          <details id="jumpCarousel" class="qopt" style="margin-top: 32px; border: 1.5px solid #D5CFC1; background: #FFF;">
+            <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Carousel builder (5 slides)</summary>
+            <div style="padding: 8px 18px 18px;">
+              <div class="note" style="margin-bottom: 16px;">Slide 1 uses the cover photo + box. Slides 2–5 are big text on the blue background. Edit any text and the preview updates. Download each, or all at once.</div>
+              <div id="carouselContainer"></div>
+              <button class="btn" id="downloadAllSlidesBtn" style="margin-top: 16px;">↓ Download All 5 Slides</button>
+            </div>
+          </details>
+
+          <details class="qopt" style="margin-top: 12px; border: 1.5px solid #D5CFC1; background: #FFF;">
+            <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Reel script (15-sec video narration)</summary>
+            <div style="padding: 0 18px 18px;">
+              <div id="reelBox" style="font-family: 'Fraunces', serif; font-size: 15px; line-height: 1.6;"></div>
+              <button class="btn-secondary" id="copyReelBtn" style="margin-top: 12px;">📋 Copy Reel Script</button>
+            </div>
+          </details>
+
+          </div><div class="pane" data-pane="verify" hidden>
+          <div class="section-label" style="margin-top: 32px;">Signature</div>
+          <input class="sig-input" id="signatureInput" value="~MS" placeholder="~Your initials">
+
+          <div id="verifyPanel" class="hidden" style="margin-top: 28px; border: 1.5px solid #D72638; background: #FFF; padding: 14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#D72638; margin-bottom:8px;">⚠ Verify before posting</div>
+            <div class="note" style="margin-bottom:10px;">Tick each fact once you've confirmed it against the source. Posting fast is when mistakes slip out.</div>
+            <div id="verifyList"></div>
+          </div>
+
+          <div class="section-label" style="margin-top: 28px;">Caption preview</div>
+          <div id="captionMeta" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#888; margin-bottom:6px;"></div>
+          <div id="captionPreview" style="background:#FFF; border:1.5px solid #D5CFC1; padding:14px 16px; white-space:pre-wrap; font-family:'Fraunces',serif; font-size:15px; line-height:1.6; max-height:300px; overflow:auto;"></div>
+
+          <div class="controls-row" style="margin-top: 16px;">
+            <button class="btn" id="copyCaptionBtn">📋 Copy Caption</button>
+          </div></div>
+        </div>
+        </div>
         <!-- COVER: right column on desktop; sits between hooks and summary on mobile -->
         <div class="cover-col" id="jumpCover">
           <div class="section-label">Cover image / video</div>
@@ -799,83 +875,6 @@
           <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; letter-spacing: 0.1em; text-transform: uppercase;">
             1080 × 1350 · 4:5 portrait
           </div>
-        </div>
-
-        <div class="col-rest">
-          <div class="pane-switcher" style="display:flex; gap:0; border-bottom:2px solid var(--rule); margin-bottom:14px; flex-wrap:wrap;">
-        <button type="button" class="tab active" data-pane="caption">Caption</button>
-        <button type="button" class="tab" data-pane="tags">Hashtags · Prompt</button>
-        <button type="button" class="tab qopt" data-pane="extras">Carousel · Reel</button>
-        <button type="button" class="tab qopt" data-pane="verify">Verify · Preview</button>
-      </div>
-      
-          <div class="pane" data-pane="caption">
-          <div class="qopt">
-          <div class="section-label" id="jumpCaption" style="margin-top: 32px;">Summary (for the caption)</div>
-          <div class="summary-box" id="summaryBox"></div>
-          <div class="controls-row" style="margin-top: 10px;">
-            <button class="btn-tiny" id="copySummaryBtn">📋 Copy Summary</button>
-          </div>
-
-          <div id="rephraseSection" class="hidden">
-            <div class="section-label" style="margin-top: 32px;">Rephrased post <span id="rephraseCount" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#888; letter-spacing:0.08em;"></span></div>
-            <div class="note" style="margin: 0 0 8px;">A full rewrite in your own words — post this instead of copying the original.</div>
-            <div id="rephraseBox" style="background:#FFF; border:1.5px solid #D5CFC1; padding:14px 16px; max-height:320px; overflow:auto; font-family:'Fraunces',serif; font-size:15px; line-height:1.65; white-space:pre-wrap;"></div>
-            <div class="controls-row" style="margin-top: 10px;">
-              <button class="btn-tiny" id="copyRephraseBtn">📋 Copy Rephrased Post</button>
-            </div>
-          </div>
-
-          <div class="section-label" style="margin-top: 32px;">Discussion question (drives comments)</div>
-          <div class="summary-box" id="discussionBox" style="font-style: italic;"></div>
-
-          </div><div class="pane" data-pane="tags" hidden>
-          <div class="section-label" style="margin-top: 32px;">Hashtags</div>
-          <div id="hashtagsBox"></div>
-          <button class="btn-tiny" id="copyHashtagsBtn" style="margin-top: 10px;">📋 Copy Hashtags</button>
-
-          <div class="section-label" style="margin-top: 32px;">Image prompt (for Nano Banana / Midjourney)</div>
-          <textarea class="input mono" id="imagePromptBox" readonly style="min-height: 120px;"></textarea>
-          <div class="controls-row" style="margin-top: 12px;">
-            <button class="btn-secondary" id="copyImagePromptBtn">📋 Copy Image Prompt</button>
-          </div>
-          </div>
-
-          </div></div><div class="pane" data-pane="extras" hidden>
-          <details id="jumpCarousel" class="qopt" style="margin-top: 32px; border: 1.5px solid #D5CFC1; background: #FFF;">
-            <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Carousel builder (5 slides)</summary>
-            <div style="padding: 8px 18px 18px;">
-              <div class="note" style="margin-bottom: 16px;">Slide 1 uses the cover photo + box. Slides 2–5 are big text on the blue background. Edit any text and the preview updates. Download each, or all at once.</div>
-              <div id="carouselContainer"></div>
-              <button class="btn" id="downloadAllSlidesBtn" style="margin-top: 16px;">↓ Download All 5 Slides</button>
-            </div>
-          </details>
-
-          <details class="qopt" style="margin-top: 12px; border: 1.5px solid #D5CFC1; background: #FFF;">
-            <summary style="cursor: pointer; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #D72638;">▸ Reel script (15-sec video narration)</summary>
-            <div style="padding: 0 18px 18px;">
-              <div id="reelBox" style="font-family: 'Fraunces', serif; font-size: 15px; line-height: 1.6;"></div>
-              <button class="btn-secondary" id="copyReelBtn" style="margin-top: 12px;">📋 Copy Reel Script</button>
-            </div>
-          </details>
-
-          </div><div class="pane" data-pane="verify" hidden>
-          <div class="section-label" style="margin-top: 32px;">Signature</div>
-          <input class="sig-input" id="signatureInput" value="~MS" placeholder="~Your initials">
-
-          <div id="verifyPanel" class="hidden" style="margin-top: 28px; border: 1.5px solid #D72638; background: #FFF; padding: 14px 16px;">
-            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#D72638; margin-bottom:8px;">⚠ Verify before posting</div>
-            <div class="note" style="margin-bottom:10px;">Tick each fact once you've confirmed it against the source. Posting fast is when mistakes slip out.</div>
-            <div id="verifyList"></div>
-          </div>
-
-          <div class="section-label" style="margin-top: 28px;">Caption preview</div>
-          <div id="captionMeta" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#888; margin-bottom:6px;"></div>
-          <div id="captionPreview" style="background:#FFF; border:1.5px solid #D5CFC1; padding:14px 16px; white-space:pre-wrap; font-family:'Fraunces',serif; font-size:15px; line-height:1.6; max-height:300px; overflow:auto;"></div>
-
-          <div class="controls-row" style="margin-top: 16px;">
-            <button class="btn" id="copyCaptionBtn">📋 Copy Caption</button>
-          </div></div>
         </div>
       </div>
     </div>
